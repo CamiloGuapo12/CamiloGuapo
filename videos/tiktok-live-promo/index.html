@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --bg: #07070d;
+        --cyan: #25f4ee;
+        --pink: #fe2c55;
+        --white: #ffffff;
+        --dim: #9a9ab0;
+      }
+      html, body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: var(--bg);
+        font-family: Montserrat, "Helvetica Neue", sans-serif;
+        color: var(--white);
+      }
+      #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+
+      /* persistent background */
+      .glow { position: absolute; border-radius: 50%; filter: blur(140px); }
+      #glowA { width: 900px; height: 900px; left: -300px; top: 100px; background: var(--cyan); opacity: 0.28; }
+      #glowB { width: 900px; height: 900px; right: -350px; bottom: 100px; background: var(--pink); opacity: 0.30; }
+      .grid {
+        position: absolute; inset: 0;
+        background-image:
+          linear-gradient(rgba(255,255,255,0.045) 2px, transparent 2px),
+          linear-gradient(90deg, rgba(255,255,255,0.045) 2px, transparent 2px);
+        background-size: 90px 90px;
+      }
+
+      .scene {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column; align-items: center;
+        padding: 210px 70px 0 70px; /* clear of TikTok top UI */
+      }
+
+      /* glitch-style title */
+      .title { font-weight: 900; text-transform: uppercase; line-height: 0.95; text-align: center; letter-spacing: -0.02em; }
+      .t-white { color: var(--white); }
+      .t-cyan { color: var(--cyan); text-shadow: 6px 6px 0 rgba(254,44,85,0.85); }
+      .t-pink { color: #ff5c7c; text-shadow: -6px 6px 0 rgba(37,244,238,0.85); }
+
+      /* ---------- Scene 1 ---------- */
+      #s1 { justify-content: flex-start; }
+      #s1 .l1 { font-size: 120px; margin-top: 120px; }
+      #s1 .l2 { font-size: 150px; margin-top: 18px; }
+      #s1 .big {
+        margin-top: 90px;
+        font-size: 430px; font-weight: 900; line-height: 1;
+        color: var(--white);
+        text-shadow: 12px 12px 0 var(--pink), -12px -12px 0 var(--cyan);
+        display: flex; align-items: baseline;
+      }
+      #s1 .big small { font-size: 190px; color: var(--dim); text-shadow: none; margin-left: 12px; }
+      #s1 .sub { margin-top: 50px; font-size: 54px; font-weight: 700; color: var(--dim); text-align: center; }
+
+      /* ---------- Scene 2 ---------- */
+      #s2 { justify-content: flex-start; }
+      #s2 .head { font-size: 92px; }
+      .cards { margin-top: 70px; width: 100%; display: flex; flex-direction: column; gap: 34px; }
+      .card {
+        width: 100%; height: 300px; border-radius: 44px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+        border: 3px solid rgba(255,255,255,0.14);
+        display: flex; align-items: center; padding: 0 44px; gap: 40px;
+      }
+      .avatar {
+        position: relative; width: 190px; height: 190px; border-radius: 50%; overflow: hidden; flex: none;
+        border: 6px solid var(--white);
+      }
+      .avatar::before { /* head */
+        content: ""; position: absolute; width: 76px; height: 76px; border-radius: 50%;
+        left: 50%; top: 34px; margin-left: -38px; background: rgba(255,255,255,0.92);
+      }
+      .avatar::after { /* shoulders */
+        content: ""; position: absolute; width: 150px; height: 120px; border-radius: 75px 75px 0 0;
+        left: 50%; bottom: -22px; margin-left: -75px; background: rgba(255,255,255,0.92);
+      }
+      #av1 { background: linear-gradient(160deg, #ff8a00, #fe2c55); }
+      #av2 { background: linear-gradient(160deg, #6b6b80, #2d2d3d); }
+      #av3 { background: linear-gradient(160deg, #25f4ee, #6a5cff); }
+      .info { flex: 1; min-width: 0; }
+      .info .user { font-size: 44px; font-weight: 700; color: var(--white); }
+      .info .verdict { margin-top: 10px; font-size: 40px; font-weight: 900; text-transform: uppercase; }
+      .v-good { color: var(--cyan); }
+      .v-bad { color: var(--pink); }
+      .v-mid { color: #ffd23f; }
+      .score {
+        flex: none; width: 250px; height: 210px; border-radius: 40px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 84px; font-weight: 900; background: var(--white); color: #07070d;
+      }
+      .score small { font-size: 38px; color: #6b6b80; margin-top: 30px; }
+
+      /* ---------- Scene 3 ---------- */
+      #s3 { justify-content: flex-start; }
+      .live-badge {
+        margin-top: 60px; padding: 22px 56px; border-radius: 26px; background: var(--pink);
+        font-size: 70px; font-weight: 900; letter-spacing: 0.06em; display: flex; align-items: center; gap: 24px;
+      }
+      .live-badge i { display: block; width: 34px; height: 34px; border-radius: 50%; background: var(--white); }
+      #s3 .h1 { margin-top: 70px; font-size: 138px; }
+      #s3 .h2 { margin-top: 12px; font-size: 138px; }
+      .chat { margin-top: 90px; width: 100%; display: flex; flex-direction: column; gap: 26px; }
+      .msg {
+        align-self: flex-start; padding: 26px 40px; border-radius: 40px 40px 40px 10px;
+        background: rgba(255,255,255,0.12); font-size: 46px; font-weight: 700; max-width: 900px;
+      }
+      .msg b { color: var(--cyan); margin-right: 14px; }
+      .msg.r { align-self: flex-end; border-radius: 40px 40px 10px 40px; background: rgba(254,44,85,0.35); }
+
+      /* ---------- Scene 4 ---------- */
+      #s4 { justify-content: flex-start; }
+      #s4 .pre { margin-top: 150px; font-size: 76px; font-weight: 700; color: var(--dim); text-align: center; }
+      #s4 .h1 { margin-top: 30px; font-size: 176px; }
+      #s4 .h2 { margin-top: 10px; font-size: 176px; }
+      #s4 .btn {
+        margin-top: 100px; padding: 44px 90px; border-radius: 80px;
+        background: linear-gradient(90deg, var(--cyan), var(--pink));
+        font-size: 84px; font-weight: 900; color: #07070d; text-transform: uppercase;
+      }
+      #s4 .handle { margin-top: 70px; font-size: 76px; font-weight: 900; }
+      #s4 .tag { margin-top: 26px; font-size: 48px; font-weight: 700; color: var(--dim); text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="15" data-width="1080" data-height="1920">
+      <!-- persistent background -->
+      <div class="grid clip" id="grid" data-start="0" data-duration="15" data-track-index="0"></div>
+      <div class="glow clip" id="glowA" data-layout-allow-overflow data-start="0" data-duration="15" data-track-index="1"></div>
+      <div class="glow clip" id="glowB" data-layout-allow-overflow data-start="0" data-duration="15" data-track-index="2"></div>
+
+      <!-- Scene 1: hook -->
+      <div class="scene clip" id="s1" data-start="0" data-duration="3.4" data-track-index="3">
+        <div class="title t-white l1" id="s1l1">¿Tu foto de perfil</div>
+        <div class="title t-cyan l2" id="s1l2">saca qué nota?</div>
+        <div class="big" id="s1big"><span id="s1num">?</span><small>/10</small></div>
+        <div class="sub" id="s1sub">Yo te la califico sin filtro</div>
+      </div>
+
+      <!-- Scene 2: rating cards -->
+      <div class="scene clip" id="s2" data-start="3.4" data-duration="4.2" data-track-index="4">
+        <div class="title t-white head" id="s2head">Foto por foto</div>
+        <div class="cards">
+          <div class="card" id="c1">
+            <div class="avatar" id="av1"></div>
+            <div class="info"><div class="user">@perfil.uno</div><div class="verdict v-good">Épica</div></div>
+            <div class="score"><span id="n1">0.0</span><small>/10</small></div>
+          </div>
+          <div class="card" id="c2">
+            <div class="avatar" id="av2"></div>
+            <div class="info"><div class="user">@perfil.dos</div><div class="verdict v-bad">Cero luz</div></div>
+            <div class="score"><span id="n2">0.0</span><small>/10</small></div>
+          </div>
+          <div class="card" id="c3">
+            <div class="avatar" id="av3"></div>
+            <div class="info"><div class="user">@perfil.tres</div><div class="verdict v-mid">Casi casi</div></div>
+            <div class="score"><span id="n3">0.0</span><small>/10</small></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 3: live -->
+      <div class="scene clip" id="s3" data-start="7.6" data-duration="3.9" data-track-index="5">
+        <div class="live-badge" id="badge"><i id="dot"></i>EN VIVO</div>
+        <div class="title t-white h1" id="s3h1">Te califico</div>
+        <div class="title t-pink h2" id="s3h2">en directo</div>
+        <div class="chat">
+          <div class="msg" id="m1"><b>@ana</b>¡califica la mía!</div>
+          <div class="msg r" id="m2"><b>@leo</b>uff ese 3/10 dolió</div>
+          <div class="msg" id="m3"><b>@sofi</b>quiero mi nota ya</div>
+        </div>
+      </div>
+
+      <!-- Scene 4: CTA -->
+      <div class="scene clip" id="s4" data-start="11.5" data-duration="3.5" data-track-index="6">
+        <div class="pre" id="s4pre">Manda tu foto y</div>
+        <div class="title t-cyan h1" id="s4h1">entra al</div>
+        <div class="title t-pink h2" id="s4h2">live</div>
+        <div class="btn" id="s4btn">Sígueme</div>
+        <div class="handle" id="s4handle">@TU_USUARIO</div>
+        <div class="tag" id="s4tag">Te doy tu nota en vivo</div>
+      </div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      /* ambient background drift across the whole video */
+      tl.fromTo("#glowA", { x: 0, y: 0 }, { x: 260, y: 500, duration: 15, ease: "sine.inOut" }, 0);
+      tl.fromTo("#glowB", { x: 0, y: 0 }, { x: -240, y: -520, duration: 15, ease: "sine.inOut" }, 0);
+      tl.fromTo("#grid", { y: 0 }, { y: 90, duration: 15, ease: "none" }, 0);
+
+      /* ---- Scene 1 (0 – 3.6) ---- */
+      tl.fromTo("#s1l1", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.1);
+      tl.fromTo("#s1l2", { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, 0.5);
+      tl.fromTo("#s1big", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(2.2)" }, 1.0);
+      // "?" flickers through fake scores, then lands
+      const flick = ["3", "9", "5", "7", "10"];
+      flick.forEach((v, i) => tl.call(() => { document.getElementById("s1num").textContent = v; }, null, 1.5 + i * 0.22));
+      tl.call(() => { document.getElementById("s1num").textContent = "?"; }, null, 2.7);
+      tl.fromTo("#s1sub", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 2.1);
+      tl.to("#s1", { opacity: 0, duration: 0.2, ease: "power1.in" }, 3.2);
+
+      /* ---- Scene 2 (3.3 – 7.9) ---- */
+      tl.fromTo("#s2", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 3.4);
+      tl.fromTo("#s2head", { opacity: 0, y: -40 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 3.5);
+      const scores = [
+        { id: "c1", n: "n1", v: 9.5, at: 3.8 },
+        { id: "c2", n: "n2", v: 2.5, at: 4.9 },
+        { id: "c3", n: "n3", v: 7.0, at: 6.0 },
+      ];
+      scores.forEach((s) => {
+        tl.fromTo("#" + s.id, { opacity: 0, x: 220 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, s.at);
+        const obj = { val: 0 };
+        tl.to(obj, {
+          val: s.v, duration: 0.7, ease: "power2.out",
+          onUpdate: () => { document.getElementById(s.n).textContent = obj.val.toFixed(1); },
+        }, s.at + 0.25);
+        tl.fromTo("#" + s.id + " .score", { scale: 1 }, { scale: 1.14, duration: 0.18, yoyo: true, repeat: 1, ease: "power2.out" }, s.at + 0.95);
+      });
+      tl.to("#s2", { opacity: 0, duration: 0.2, ease: "power1.in" }, 7.4);
+
+      /* ---- Scene 3 (7.6 – 11.8) ---- */
+      tl.fromTo("#s3", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 7.6);
+      tl.fromTo("#badge", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2.4)" }, 7.8);
+      // recording dot pulse (finite)
+      tl.fromTo("#dot", { scale: 1 }, { scale: 1.6, duration: 0.35, yoyo: true, repeat: 5, ease: "sine.inOut" }, 8.2);
+      tl.fromTo("#s3h1", { opacity: 0, x: -120 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 8.2);
+      tl.fromTo("#s3h2", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 8.45);
+      ["m1", "m2", "m3"].forEach((id, i) => {
+        tl.fromTo("#" + id, { opacity: 0, y: 70, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.6)" }, 9.0 + i * 0.55);
+      });
+      tl.to("#s3", { opacity: 0, duration: 0.2, ease: "power1.in" }, 11.3);
+
+      /* ---- Scene 4 (11.5 – 15) ---- */
+      tl.fromTo("#s4", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 11.5);
+      tl.fromTo("#s4pre", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 11.7);
+      tl.fromTo("#s4h1", { opacity: 0, scale: 1.5 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, 12.0);
+      tl.fromTo("#s4h2", { opacity: 0, scale: 1.5 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, 12.25);
+      tl.fromTo("#s4btn", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 12.7);
+      tl.fromTo("#s4btn", { scale: 1 }, { scale: 1.07, duration: 0.4, yoyo: true, repeat: 3, ease: "sine.inOut" }, 13.2);
+      tl.fromTo("#s4handle", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 13.0);
+      tl.fromTo("#s4tag", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 13.4);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
