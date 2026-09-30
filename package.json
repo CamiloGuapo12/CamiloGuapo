@@ -1,0 +1,22 @@
+{
+  "name": "camiloguapo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CamiloGuapo12/CamiloGuapo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CamiloGuapo12/CamiloGuapo/issues"
+  },
+  "homepage": "https://github.com/CamiloGuapo12/CamiloGuapo#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3"
+  }
+}
