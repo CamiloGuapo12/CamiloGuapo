@@ -1,5 +1,5 @@
 -- LiveTracker security hardening. Review, then run in the Supabase SQL editor.
--- Not applied automatically: it changes production authorization rules.
+-- Applied to the production project on 2026-10-06 (statement by statement; keep for reference).
 
 -- 1. CRITICAL: any user could run UPDATE profiles SET is_admin = true on their own row
 --    (profiles_update has no column restriction), and a team manager could do it to members.

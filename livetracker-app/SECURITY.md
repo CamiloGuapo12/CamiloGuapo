@@ -9,12 +9,13 @@
 | Media | `ai-coach` aceptaba la `anon key` pública (el JWT es válido), así que cualquiera podía gastar tu cuota de Gemini. | Verifica la sesión real contra Supabase Auth, limita tamaños, valida tipo de imagen, key de Gemini por cabecera y errores genéricos. |
 | Baja | Íconos del manifest en base64; service worker cacheaba terceros. | Íconos reales; el SW solo cachea el mismo origen. |
 
-## Pendiente de aplicar en Supabase (no se aplicó nada en producción)
-Todo está en `supabase/migrations/20261006000000_security_hardening.sql`.
-1. **Crítico:** cualquier usuario puede hacerse admin con `update profiles set is_admin = true` sobre su propia fila (`profiles_update` no restringe columnas). Un admin lee los lives y pagos de todos. El SQL agrega un trigger que lo impide.
-2. **Alto:** `kick_from_team` puede ejecutarse sin sesión y saca a cualquiera de su equipo (la validación evalúa a NULL). Corregido en el SQL y con `REVOKE` a `anon`.
-3. `rls_auto_enable` y `handle_new_user` no deben ser invocables por `/rest/v1/rpc`.
-4. Desplegar la nueva `ai-coach`: `supabase functions deploy ai-coach`.
+## Aplicado en Supabase (6 oct 2026)
+Probado en la base de datos: un usuario no admin ya no puede hacerse admin.
+1. Trigger `protect_profile_privileges`: solo un admin puede cambiar `is_admin`.
+2. `kick_from_team` y `set_co_manager` rechazan llamadas sin sesión; `anon` ya no puede ejecutarlas.
+3. `rls_auto_enable` y `handle_new_user` ya no se pueden invocar por `/rest/v1/rpc`.
+4. `ai-coach` v11 desplegada: exige sesión real, no solo la anon key.
+Los avisos que quedan en el linter son esperados: `is_admin`, `is_current_user_admin` y `is_team_manager_of` solo devuelven datos del propio usuario, y `kick_from_team` y `set_co_manager` deben poder llamarlas usuarios con sesión.
 
 ## Pendiente por decidir (no lo toqué)
 - **`teams_select_all` (USING true):** cualquiera, incluso sin cuenta, puede listar todos los equipos con su `invite_code`. Lo ideal es un RPC `join_team(code)` y restringir el SELECT; requiere cambiar el flujo de unirse a un equipo.

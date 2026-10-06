@@ -12,7 +12,7 @@ const CORS = {
 };
 
 const MAX_TEXT = 20_000;
-const MAX_IMAGE_B64 = 7_000_000; // ~5 MB of image data
+const MAX_IMAGE_B64 = 14_000_000; // ~10 MB of image data
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
 
