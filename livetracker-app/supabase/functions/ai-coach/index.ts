@@ -11,6 +11,9 @@ const CORS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const MAX_TEXT = 20_000;
+const MAX_IMAGE_B64 = 7_000_000; // ~5 MB of image data
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"];
 
 serve(async (req) => {
@@ -23,10 +26,16 @@ serve(async (req) => {
   }
 
   try {
-    // Supabase runtime verifies the JWT before this code runs (verify_jwt=true by default).
-    // We only do a sanity check that the header exists.
+    // verify_jwt only checks the signature, and the public anon key is a valid JWT too.
+    // Ask Supabase Auth who the caller is so only signed-in users can spend the Gemini quota.
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return json({ error: "Missing authorization header" }, 401);
+    const authRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/user`, {
+      headers: { Authorization: authHeader, apikey: Deno.env.get("SUPABASE_ANON_KEY") ?? "" },
+    });
+    if (!authRes.ok) return json({ error: "Invalid or expired session" }, 401);
+    const user = await authRes.json();
+    if (!user?.id) return json({ error: "Invalid or expired session" }, 401);
 
     const body = await req.json();
     const systemPrompt: string = body.systemPrompt || "";
@@ -36,6 +45,12 @@ serve(async (req) => {
     const imageMediaType: string = body.imageMediaType || "image/jpeg";
 
     if (!userMessage) return json({ error: "Missing userMessage" }, 400);
+    if (typeof userMessage !== "string" || userMessage.length > MAX_TEXT) return json({ error: "userMessage too long" }, 413);
+    if (typeof systemPrompt !== "string" || systemPrompt.length > MAX_TEXT) return json({ error: "systemPrompt too long" }, 413);
+    if (imageBase64 !== undefined) {
+      if (typeof imageBase64 !== "string" || imageBase64.length > MAX_IMAGE_B64) return json({ error: "Image too large" }, 413);
+      if (!ALLOWED_IMAGE_TYPES.includes(imageMediaType)) return json({ error: "Unsupported image type" }, 400);
+    }
 
     // Fast path: health check ping (used by the frontend to detect deployment status)
     if (userMessage === "__ping__") {
@@ -64,10 +79,10 @@ serve(async (req) => {
     let lastError: string | null = null;
     for (const model of MODELS) {
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
         const res = await fetch(url, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
           body: JSON.stringify({
             system_instruction: { parts: [{ text: systemPrompt }] },
             contents: [{ role: "user", parts: userParts }],
@@ -77,7 +92,7 @@ serve(async (req) => {
         const data = await res.json();
         if (data.error) {
           lastError = data.error.message || `Error ${data.error.code}`;
-          console.warn(`Model ${model} failed:`, data.error);
+          console.warn(`Model ${model} failed:`, data.error?.code);
           continue;
         }
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -91,11 +106,11 @@ serve(async (req) => {
       }
     }
 
-    return json({ error: lastError || "All models failed" }, 502);
+    return json({ error: "All models failed" }, 502);
 
   } catch (e) {
     console.error("ai-coach function error:", e);
-    return json({ error: (e as Error).message || "Unknown error" }, 500);
+    return json({ error: "Internal error" }, 500);
   }
 });
 

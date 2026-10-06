@@ -125,7 +125,7 @@ No necesitas re-desplegar la función — los secretos se actualizan en caliente
 ## 🛡 ¿Qué tan seguro es esto?
 
 - ✅ Tu `GEMINI_API_KEY` vive como variable de entorno del servidor de Supabase — **nunca** se envía a ningún navegador
-- ✅ Solo usuarios autenticados en tu app pueden invocar la función (validado vía JWT de Supabase)
+- ✅ Solo usuarios con sesión real en tu app pueden invocar la función (la función consulta a Supabase Auth; la anon key pública NO basta)
 - ✅ Los clientes solo reciben la respuesta de texto de la IA, nunca la key
 - ✅ Si mañana se filtra el código del frontend al público, tu key sigue a salvo
 

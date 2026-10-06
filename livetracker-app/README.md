@@ -29,5 +29,5 @@ App PWA para registrar y analizar ganancias de TikTok Live.
 ## Stack
 - Frontend: HTML/CSS/JS vanilla (PWA)
 - Auth + DB: Supabase
-- IA: Claude claude-sonnet-4-20250514
+- IA: Gemini (Edge Function `ai-coach`) y Claude para el escáner de capturas
 - Conversión de divisas: open.er-api.com

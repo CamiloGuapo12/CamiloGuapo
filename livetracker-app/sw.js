@@ -1,5 +1,5 @@
-const CACHE = 'livetracker-v3';
-const ASSETS = ['/', '/index.html'];
+const CACHE = 'livetracker-v4';
+const ASSETS = ['/', '/index.html', '/vendor/supabase.js', '/manifest.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
@@ -16,7 +16,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   // Network first for API calls, cache first for assets
-  if (e.request.url.includes('supabase') || e.request.url.includes('api.anthropic') || e.request.url.includes('open.er-api')) {
+  if (e.request.url.includes('supabase') || e.request.url.includes('api.anthropic') || e.request.url.includes('open.er-api') || e.request.url.includes('generativelanguage') || e.request.url.includes('allorigins') || new URL(e.request.url).origin !== self.location.origin) {
     return; // always network for API
   }
   e.respondWith(
