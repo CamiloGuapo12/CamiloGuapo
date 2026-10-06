@@ -20,7 +20,7 @@ Todo está en `supabase/migrations/20261006000000_security_hardening.sql`.
 - **`teams_select_all` (USING true):** cualquiera, incluso sin cuenta, puede listar todos los equipos con su `invite_code`. Lo ideal es un RPC `join_team(code)` y restringir el SELECT; requiere cambiar el flujo de unirse a un equipo.
 - **Tablas `church_*`:** políticas `public_read_write` con `true`: cualquiera con la anon key puede crear, editar y borrar eventos, roles y asignaciones. Es de otra app del mismo proyecto; hay que decidir cómo autenticarla.
 - **Protección contra contraseñas filtradas** desactivada en Supabase Auth (Authentication → Policies).
-- **Claves de IA en el navegador:** esta versión del `index.html` pide al usuario su propia key de Gemini/Anthropic y la guarda en el navegador; el frontend no usa `ai-coach`. Revisa que no sea una versión anterior a la que está en Netlify.
+- **Clave de Gemini propia en el navegador:** el frontend en vivo usa `ai-coach` primero, pero conserva un respaldo donde el usuario puede pegar su propia key de Gemini, guardada en `localStorage`. Si ya no la necesitas, conviene quitar ese respaldo.
 - El bucket `avatars` es público (esperable) con límite de 2 MB y solo jpeg/png/webp: correcto.
 - La sincronización de TikTok pasa por `api.allorigins.win` (tercero); el resultado ya se escapa, pero ese proxy ve los usernames consultados.
 - El export CSV no neutraliza fórmulas (`=`, `+`, `-`, `@`) al inicio de las notas.
