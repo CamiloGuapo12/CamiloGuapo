@@ -1,0 +1,14 @@
+{
+  "name": "livetracker-app",
+  "version": "1.0.0",
+  "description": "App PWA para registrar y analizar ganancias de TikTok Live.",
+  "main": "sw.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.4"
+  }
+}
