@@ -306,7 +306,8 @@ function sparkle() { if (!reduced) sky(); }
 (function corner() {
   const M = S.messages || [], R = S.rules || [];
   const who = { ale: 'Ale', camilo: 'Camilo' };
-  $('#msgs').innerHTML = M.map((m) => `<figure class="msg ${m.who}" data-w="${m.who}"><blockquote>${m.text}</blockquote><figcaption>${who[m.who]} · ${m.date}</figcaption></figure>`).join('');
+  const label = (m) => { const [, mo, d] = m.iso.split('-'); return `${+d} de ${MONTHS[+mo - 1]}${m.time ? ' · ' + m.time : ''}`; };
+  $('#msgs').innerHTML = M.map((m) => `<figure class="msg ${m.who}" data-w="${m.who}"><blockquote>${m.text}</blockquote><figcaption>${who[m.who]} · ${label(m)}</figcaption></figure>`).join('');
   $('#rules').innerHTML = R.map((r) => `<li>${r}</li>`).join('');
   let io;
   window.playCorner = () => {
