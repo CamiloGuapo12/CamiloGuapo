@@ -1,4 +1,5 @@
 const S = window.SITE;
+let tlKey = '', nextOpen = false, tlObs;
 const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const $ = (s) => document.querySelector(s);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -60,9 +61,7 @@ function render() {
     ['+400', 'llamadas y videollamadas'],
   ].map(([v, l]) => `<li><b>${v}</b><span>${l}</span></li>`).join('');
 
-  const finale = S.cards.find((c) => c.finale);
-  $('#timeline').innerHTML = S.timeline.filter((t) => !t.finale || isOpen(finale))
-    .map((t) => `<li class="${t.star ? 'star' : ''}${t.future ? ' future' : ''}"><time>${t.t}</time><p>${t.p}</p></li>`).join('');
+  renderTimeline();
   $('#chips').innerHTML = S.chips.map((c) => `<li>${c}</li>`).join('');
   $('#words').innerHTML = S.words.map((w) => `<div><h4>${w.h}</h4><div class="wl">${w.list.map((x) => `<span>${x}</span>`).join('')}</div></div>`).join('');
   tick();
@@ -180,4 +179,72 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) tick
     box.append(w); setTimeout(() => w.remove(), life * 1000);
   }
   setTimeout(spawn, 1500); setInterval(spawn, 6500);
+})();
+
+// ---- línea de tiempo: se va revelando a medida que bajas
+function renderTimeline() {
+  const fin = S.cards.find((c) => c.finale), open = isOpen(fin);
+  const key = String(open) + nextOpen;
+  if (key === tlKey) return; tlKey = key;
+  const el = $('#timeline');
+  const items = S.timeline.map((t) => {
+    if (t.finale && !open) return `<li class="tl star locked-tl"><time>11 de noviembre</time><p>Todavía es sorpresa… se revela ese día a la 1:00 p. m. 🇭🇳</p></li>`;
+    return `<li class="tl ${t.star ? 'star' : ''}"><time>${t.t}</time><p>${t.p}</p></li>`;
+  }).join('');
+  const n = S.next;
+  const tail = nextOpen
+    ? `<li class="tl in"><div class="next-open"><h3>${n.title}</h3><ul>${n.items.map((x) => `<li>${x}</li>`).join('')}</ul><p>${n.foot}</p></div></li>`
+    : `<li class="tl"><button class="next" id="nextBtn" type="button"><b>${n.title}</b><span>Toca aquí para revelarlo ✦</span></button></li>`;
+  el.innerHTML = items + tail;
+  const nb = $('#nextBtn'); if (nb) nb.addEventListener('click', () => { nextOpen = true; tlKey = ''; renderTimeline(); sparkle(); });
+  if (tlObs) tlObs.disconnect();
+  const lis = [...el.querySelectorAll('li.tl:not(.in)')];
+  if (reduced || !('IntersectionObserver' in window)) { lis.forEach((l) => l.classList.add('in')); return; }
+  let q = 0;
+  tlObs = new IntersectionObserver((es) => {
+    es.filter((e) => e.isIntersecting).forEach((e) => { e.target.style.transitionDelay = (q++ % 4) * 90 + 'ms'; e.target.classList.add('in'); tlObs.unobserve(e.target); });
+    setTimeout(() => { q = 0; }, 400);
+  }, { threshold: .4 });
+  lis.forEach((l) => tlObs.observe(l));
+}
+function sparkle() { if (!reduced) sky(); }
+
+// ---- ositos y lunitas flotando
+(function floaters() {
+  if (reduced) return;
+  const box = $('#ink'), E = ['🧸', '🌙', '🧸', '🌙', '🧸'];
+  function spawn() {
+    if (document.hidden || box.querySelectorAll('.fl').length > 9) return;
+    const f = document.createElement('span'), life = rnd(9, 14);
+    f.className = 'fl'; f.textContent = E[(Math.random() * E.length) | 0];
+    f.style.cssText = `left:${rnd(2, 92).toFixed(0)}%;top:${rnd(6, 88).toFixed(0)}%;--sz:${rnd(18, 36).toFixed(0)}px;--life:${life.toFixed(1)}s;--r0:${rnd(-18, 18).toFixed(0)}deg;--r1:${rnd(-30, 30).toFixed(0)}deg`;
+    box.append(f); setTimeout(() => f.remove(), life * 1000);
+  }
+  spawn(); setInterval(spawn, 1800);
+})();
+
+// ---- música: playlist de las canciones que nos dedicamos
+(function music() {
+  const list = S.playlist; if (!list || !list.length) return;
+  const dock = $('#dock'); let player, ready = false, idx = 0, want = false, errs = 0;
+  const info = () => { const t = list[idx]; $('#dTitle').textContent = `${t.title} · ${t.artist}`; $('#dBy').textContent = `Dedicada por ${t.by} · ${t.date}`; };
+  const go = (i) => { idx = (i + list.length) % list.length; info(); if (ready) player.loadVideoById(list[idx].id); };
+  window.onYouTubeIframeAPIReady = () => {
+    player = new YT.Player('ytp', { width: '100%', height: 225, videoId: list[0].id, playerVars: { playsinline: 1, controls: 0, rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 0, disablekb: 1 },
+      events: {
+        onReady: () => { ready = true; player.setVolume(35); if (want) player.playVideo(); },
+        onStateChange: (e) => { const on = e.data === 1; if (e.data === 0) go(idx + 1); if (on) errs = 0; dock.classList.toggle('playing', on); $('#dPlay').textContent = on ? '⏸' : '▶'; },
+        onError: () => { if (++errs < list.length) go(idx + 1); },
+      } });
+  };
+  const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; s.async = true; document.head.append(s);
+  info();
+  $('#enter').addEventListener('click', () => {
+    $('#splash').classList.add('out'); dock.hidden = false; document.body.classList.add('has-dock');
+    want = true; if (ready) player.playVideo();
+  });
+  $('#dTog').addEventListener('click', () => dock.classList.toggle('open'));
+  $('#dNext').addEventListener('click', () => go(idx + 1));
+  $('#dPrev').addEventListener('click', () => go(idx - 1));
+  $('#dPlay').addEventListener('click', () => { if (!ready) return; const st = player.getPlayerState(); if (st === 1) player.pauseVideo(); else player.playVideo(); });
 })();
