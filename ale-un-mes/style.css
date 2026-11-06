@@ -291,3 +291,9 @@ body.has-dock footer{padding-bottom:80px}
 @media (prefers-reduced-motion:reduce){.pol.in{animation:none}.tab{transition:none}}
 
 .pol.solo{grid-column:1/-1;justify-self:center;width:calc(50% - 7px)}
+
+/* videos en el álbum */
+.ph{position:relative}
+.play{position:absolute;inset:0;margin:auto;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:rgba(10,12,36,.55);backdrop-filter:blur(4px);color:#fff;font-size:1.2rem;padding-left:3px;border:1px solid rgba(255,255,255,.5);font-style:normal}
+.lb__img video{display:block;max-width:100%;max-height:58dvh;width:auto;height:auto;background:#000}
+.lb__img video[hidden]{display:none}

@@ -244,6 +244,11 @@ function sparkle() { if (!reduced) sky(); }
     $('#splash').classList.add('out'); dock.hidden = false; document.body.classList.add('has-dock');
     want = true; if (ready) player.playVideo();
   });
+  let paused = false;
+  window.musicCtl = {
+    pause() { if (ready && player.getPlayerState && player.getPlayerState() === 1) { player.pauseVideo(); paused = true; } },
+    resume() { if (paused && ready) { player.playVideo(); paused = false; } },
+  };
   $('#dTog').addEventListener('click', () => { const o = dock.classList.toggle('open'); $('#dTog').setAttribute('aria-expanded', o); if (!o) dock.classList.remove('vid'); });
   $('#dVid').addEventListener('click', () => dock.classList.toggle('vid'));
   $('#dNext').addEventListener('click', () => go(idx + 1));
@@ -255,7 +260,7 @@ function sparkle() { if (!reduced) sky(); }
 (function album() {
   const A = S.album; if (!A || !A.length) return;
   const box = $('#album');
-  box.innerHTML = A.map((p, i) => `<button type="button" class="pol${p.wide ? ' wide' : ''}${p.solo ? ' solo' : ''}" data-i="${i}" style="--rot:${[-2, 1.6, -1.2, 2, -1.8][i % 5]}deg"><img src="${p.src}" alt="${p.alt}" loading="lazy" style="object-position:${p.pos}" width="${p.w}" height="${p.h}"><span>${p.cap}</span></button>`).join('') + '<div class="more">Aquí seguirán llegando más fotos nuestras ✦</div>';
+  box.innerHTML = A.map((p, i) => `<button type="button" class="pol${p.wide ? ' wide' : ''}${p.solo ? ' solo' : ''}" data-i="${i}" style="--rot:${[-2, 1.6, -1.2, 2, -1.8][i % 5]}deg"><div class="ph"><img src="${p.src}" alt="${p.alt}" loading="lazy" style="object-position:${p.pos}" width="${p.w}" height="${p.h}">${p.video ? '<i class="play" aria-hidden="true">▶</i>' : ''}</div><span>${p.cap}${p.video ? ' 🎬' : ''}</span></button>`).join('') + '<div class="more">Aquí seguirán llegando más fotos nuestras ✦</div>';
   const pols = [...box.querySelectorAll('.pol')];
   let timers = [];
   window.playAlbum = () => {
@@ -268,14 +273,25 @@ function sparkle() { if (!reduced) sky(); }
     });
   };
   const lb = $('#lb'); let n = 0, last;
+  $('#lbVid').addEventListener('play', () => window.musicCtl && window.musicCtl.pause());
+  $('#lbVid').addEventListener('ended', () => window.musicCtl && window.musicCtl.resume());
   function show(i) {
     n = (i + A.length) % A.length; const p = A[n];
-    const img = $('#lbImg'); img.style.animation = 'none'; void img.offsetWidth; img.style.animation = '';
-    img.src = p.src; img.alt = p.alt; $('#lbCap').textContent = p.cap; $('#lbMsg').textContent = p.msg; $('#lbN').textContent = `${n + 1} de ${A.length}`;
+    const img = $('#lbImg'), vid = $('#lbVid');
+    vid.pause();
+    if (p.video) {
+      img.hidden = true; vid.hidden = false; vid.poster = p.src; vid.src = p.video; vid.load();
+      vid.play().catch(() => {});
+    } else {
+      vid.hidden = true; vid.removeAttribute('src'); vid.load(); img.hidden = false;
+      img.style.animation = 'none'; void img.offsetWidth; img.style.animation = ''; img.src = p.src; img.alt = p.alt;
+      window.musicCtl && window.musicCtl.resume();
+    }
+ $('#lbCap').textContent = p.cap; $('#lbMsg').textContent = p.msg; $('#lbN').textContent = `${n + 1} de ${A.length}`;
     $('.lb__card').scrollTop = 0;
   }
   const open = (i) => { last = document.activeElement; show(i); lb.hidden = false; document.body.style.overflow = 'hidden'; $('.lb__x').focus({ preventScroll: true }); };
-  const close = () => { lb.hidden = true; document.body.style.overflow = ''; last && last.focus({ preventScroll: true }); };
+  const close = () => { $('#lbVid').pause(); window.musicCtl && window.musicCtl.resume(); lb.hidden = true; document.body.style.overflow = ''; last && last.focus({ preventScroll: true }); };
   box.addEventListener('click', (e) => { const b = e.target.closest('.pol'); if (b) open(+b.dataset.i); });
   lb.addEventListener('click', (e) => { if (e.target.closest('[data-lbclose]')) close(); });
   $('#lbNext').addEventListener('click', () => show(n + 1));
