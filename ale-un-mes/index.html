@@ -50,7 +50,8 @@
 
 <nav class="tabs" role="tablist" aria-label="Secciones">
   <button class="tab" role="tab" id="tab-main" aria-selected="true" aria-controls="panel-main" data-tab="main" type="button">🌙 Nuestra luna</button>
-  <button class="tab" role="tab" id="tab-album" aria-selected="false" aria-controls="panel-album" data-tab="album" type="button">📷 Nuestro álbum</button>
+  <button class="tab" role="tab" id="tab-album" aria-selected="false" aria-controls="panel-album" data-tab="album" type="button">📷 Álbum</button>
+  <button class="tab" role="tab" id="tab-corner" aria-selected="false" aria-controls="panel-corner" data-tab="corner" type="button">💌 Rincón</button>
 </nav>
 
 <main>
@@ -89,6 +90,23 @@
     <div class="album" id="album"></div>
   </section>
 
+  </div>
+  <div id="panel-corner" role="tabpanel" aria-labelledby="tab-corner" hidden>
+    <section aria-labelledby="h-msgs">
+      <h2 id="h-msgs">Mensajes que nos guardamos</h2>
+      <p class="section-lede">Palabras de los dos que quiero recordar siempre. Un lugar para volver cuando haga falta un abrazo.</p>
+      <div class="filters" id="filters" role="group" aria-label="Filtrar mensajes">
+        <button type="button" class="flt on" data-f="all">Todos</button>
+        <button type="button" class="flt" data-f="ale">De Ale</button>
+        <button type="button" class="flt" data-f="camilo">De Camilo</button>
+      </div>
+      <div class="msgs" id="msgs"></div>
+    </section>
+    <section aria-labelledby="h-rules">
+      <h2 id="h-rules">Nuestras reglas de pareja</h2>
+      <p class="section-lede">Lo que nos prometimos para cuidarnos, escucharnos y crecer juntos.</p>
+      <ol class="rules" id="rules"></ol>
+    </section>
   </div>
 </main>
 

@@ -302,14 +302,39 @@ function sparkle() { if (!reduced) sky(); }
   card.addEventListener('touchend', (e) => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 60) show(n + (dx < 0 ? 1 : -1)); });
 })();
 
+// ---- rincón: mensajes destacados y reglas
+(function corner() {
+  const M = S.messages || [], R = S.rules || [];
+  const who = { ale: 'Ale', camilo: 'Camilo' };
+  $('#msgs').innerHTML = M.map((m) => `<figure class="msg ${m.who}" data-w="${m.who}"><blockquote>${m.text}</blockquote><figcaption>${who[m.who]} · ${m.date}</figcaption></figure>`).join('');
+  $('#rules').innerHTML = R.map((r) => `<li>${r}</li>`).join('');
+  let io;
+  window.playCorner = () => {
+    const els = [...document.querySelectorAll('#panel-corner .msg:not([hidden]), #panel-corner .rules li')];
+    els.forEach((e) => e.classList.remove('in'));
+    if (io) io.disconnect();
+    if (reduced || !('IntersectionObserver' in window)) return els.forEach((e) => e.classList.add('in'));
+    let q = 0;
+    io = new IntersectionObserver((es) => { es.filter((e) => e.isIntersecting).forEach((e) => { e.target.style.transitionDelay = (q++ % 3) * 90 + 'ms'; e.target.classList.add('in'); io.unobserve(e.target); }); setTimeout(() => { q = 0; }, 300); }, { threshold: .25 });
+    els.forEach((e) => io.observe(e));
+  };
+  $('#filters').addEventListener('click', (e) => {
+    const b = e.target.closest('.flt'); if (!b) return;
+    document.querySelectorAll('.flt').forEach((x) => x.classList.toggle('on', x === b));
+    document.querySelectorAll('#msgs .msg').forEach((m) => { m.hidden = b.dataset.f !== 'all' && m.dataset.w !== b.dataset.f; });
+    window.playCorner();
+  });
+})();
+
 // ---- pestañas
 (function tabs() {
   const tabs = [...document.querySelectorAll('.tab')];
   function setTab(name) {
     tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
-    $('#panel-main').hidden = name !== 'main'; $('#panel-album').hidden = name !== 'album';
+    ['main', 'album', 'corner'].forEach((n) => { $('#panel-' + n).hidden = n !== name; });
     const bar = $('.tabs'); window.scrollTo({ top: Math.max(0, bar.offsetTop - 10), behavior: reduced ? 'auto' : 'smooth' });
     if (name === 'album' && window.playAlbum) window.playAlbum();
+    if (name === 'corner' && window.playCorner) window.playCorner();
   }
   tabs.forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
   tabs.forEach((t, i) => t.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length]; n.focus(); n.click(); } }));
