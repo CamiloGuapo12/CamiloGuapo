@@ -226,15 +226,16 @@ function sparkle() { if (!reduced) sky(); }
 // ---- música: playlist de las canciones que nos dedicamos
 (function music() {
   const list = S.playlist; if (!list || !list.length) return;
-  const dock = $('#dock'); let player, ready = false, idx = 0, want = false, errs = 0;
+  const dock = $('#dock'); let player, ready = false, idx = 0, alt = 0, want = false, errs = 0;
+  const cur = () => (alt && list[idx].alt ? list[idx].alt[alt - 1] : list[idx].id);
   const info = () => { const t = list[idx]; $('#dTitle').textContent = `${t.title} · ${t.artist}`; $('#dBy').textContent = `Dedicada por ${t.by} · ${t.date}`; };
-  const go = (i) => { idx = (i + list.length) % list.length; info(); if (ready) player.loadVideoById(list[idx].id); };
+  const go = (i) => { idx = (i + list.length) % list.length; alt = 0; info(); if (ready) player.loadVideoById(cur()); };
   window.onYouTubeIframeAPIReady = () => {
-    player = new YT.Player('ytp', { width: '100%', height: 225, videoId: list[0].id, playerVars: { playsinline: 1, controls: 0, rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 0, disablekb: 1 },
+    player = new YT.Player('ytp', { width: '100%', height: 138, videoId: list[0].id, playerVars: { playsinline: 1, controls: 0, rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 0, disablekb: 1 },
       events: {
         onReady: () => { ready = true; player.setVolume(35); if (want) player.playVideo(); },
         onStateChange: (e) => { const on = e.data === 1; if (e.data === 0) go(idx + 1); if (on) errs = 0; dock.classList.toggle('playing', on); $('#dPlay').textContent = on ? '⏸' : '▶'; },
-        onError: () => { if (++errs < list.length) go(idx + 1); },
+        onError: () => { const t = list[idx]; if (t.alt && alt < t.alt.length) { alt++; player.loadVideoById(cur()); } else if (++errs < list.length) go(idx + 1); },
       } });
   };
   const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; s.async = true; document.head.append(s);
@@ -243,8 +244,38 @@ function sparkle() { if (!reduced) sky(); }
     $('#splash').classList.add('out'); dock.hidden = false; document.body.classList.add('has-dock');
     want = true; if (ready) player.playVideo();
   });
-  $('#dTog').addEventListener('click', () => dock.classList.toggle('open'));
+  $('#dTog').addEventListener('click', () => { const o = dock.classList.toggle('open'); $('#dTog').setAttribute('aria-expanded', o); if (!o) dock.classList.remove('vid'); });
+  $('#dVid').addEventListener('click', () => dock.classList.toggle('vid'));
   $('#dNext').addEventListener('click', () => go(idx + 1));
   $('#dPrev').addEventListener('click', () => go(idx - 1));
   $('#dPlay').addEventListener('click', () => { if (!ready) return; const st = player.getPlayerState(); if (st === 1) player.pauseVideo(); else player.playVideo(); });
+})();
+
+// ---- álbum de fotos
+(function album() {
+  const A = S.album; if (!A || !A.length) return;
+  const box = $('#album');
+  box.innerHTML = A.map((p, i) => `<button type="button" class="pol${p.wide ? ' wide' : ''}" data-i="${i}" style="--rot:${[-2, 1.6, -1.2, 2, -1.8][i % 5]}deg"><img src="${p.src}" alt="${p.alt}" loading="lazy" style="object-position:${p.pos}" width="${p.w}" height="${p.h}"><span>${p.cap}</span></button>`).join('') + '<div class="more">Aquí seguirán llegando más fotos nuestras ✦</div>';
+  const pols = [...box.querySelectorAll('.pol')];
+  if ('IntersectionObserver' in window && !reduced) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .2 });
+    pols.forEach((p) => io.observe(p));
+  } else pols.forEach((p) => p.classList.add('in'));
+  const lb = $('#lb'); let n = 0, last;
+  function show(i) {
+    n = (i + A.length) % A.length; const p = A[n];
+    const img = $('#lbImg'); img.style.animation = 'none'; void img.offsetWidth; img.style.animation = '';
+    img.src = p.src; img.alt = p.alt; $('#lbCap').textContent = p.cap; $('#lbMsg').textContent = p.msg; $('#lbN').textContent = `${n + 1} de ${A.length}`;
+    $('.lb__card').scrollTop = 0;
+  }
+  const open = (i) => { last = document.activeElement; show(i); lb.hidden = false; document.body.style.overflow = 'hidden'; $('.lb__x').focus({ preventScroll: true }); };
+  const close = () => { lb.hidden = true; document.body.style.overflow = ''; last && last.focus({ preventScroll: true }); };
+  box.addEventListener('click', (e) => { const b = e.target.closest('.pol'); if (b) open(+b.dataset.i); });
+  lb.addEventListener('click', (e) => { if (e.target.closest('[data-lbclose]')) close(); });
+  $('#lbNext').addEventListener('click', () => show(n + 1));
+  $('#lbPrev').addEventListener('click', () => show(n - 1));
+  document.addEventListener('keydown', (e) => { if (lb.hidden) return; if (e.key === 'Escape') close(); if (e.key === 'ArrowRight') show(n + 1); if (e.key === 'ArrowLeft') show(n - 1); });
+  let x0 = null; const card = $('.lb__card');
+  card.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+  card.addEventListener('touchend', (e) => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 60) show(n + (dx < 0 ? 1 : -1)); });
 })();

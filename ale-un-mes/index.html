@@ -65,6 +65,12 @@
     <ol class="timeline" id="timeline"></ol>
   </section>
 
+  <section aria-labelledby="h-album">
+    <h2 id="h-album">Nuestro álbum</h2>
+    <p class="section-lede">Toca una foto para revelarla. Cada una guarda un mensaje.</p>
+    <div class="album" id="album"></div>
+  </section>
+
   <section aria-labelledby="h-like">
     <h2 id="h-like">Lo que nos gusta a los dos</h2>
     <ul class="chips" id="chips"></ul>
@@ -97,14 +103,24 @@
 
 <canvas id="fx" aria-hidden="true"></canvas>
 <div class="dock" id="dock" hidden>
-  <div class="dock__vid" id="dockVid"><div id="ytp"></div></div>
+  <div class="dock__vid"><div id="ytp"></div></div>
+  <div class="dock__info"><b id="dTitle">—</b><span id="dBy"></span></div>
   <div class="dock__bar">
-    <button class="dock__btn disc" id="dTog" type="button" aria-label="Mostrar u ocultar reproductor">🤍</button>
-    <div class="dock__txt"><b id="dTitle">—</b><span id="dBy"></span></div>
+    <button class="dock__btn disc" id="dTog" type="button" aria-label="Abrir o cerrar la música" aria-expanded="false">🎵</button>
     <button class="dock__btn" id="dPrev" type="button" aria-label="Anterior">⏮</button>
     <button class="dock__btn" id="dPlay" type="button" aria-label="Pausar o reanudar">⏸</button>
     <button class="dock__btn" id="dNext" type="button" aria-label="Siguiente">⏭</button>
+    <button class="dock__btn" id="dVid" type="button" aria-label="Ver u ocultar el video">▭</button>
   </div>
+</div>
+<div class="lb" id="lb" hidden>
+  <div class="lb__back" data-lbclose></div>
+  <figure class="lb__card" role="dialog" aria-modal="true" aria-label="Foto del álbum">
+    <button class="lb__x" data-lbclose type="button" aria-label="Cerrar">×</button>
+    <div class="lb__img"><img id="lbImg" alt=""></div>
+    <figcaption><h3 id="lbCap"></h3><p id="lbMsg"></p></figcaption>
+    <div class="lb__nav"><button id="lbPrev" type="button" aria-label="Foto anterior">←</button><span id="lbN"></span><button id="lbNext" type="button" aria-label="Foto siguiente">→</button></div>
+  </figure>
 </div>
 <script src="content.js"></script>
 <script src="script.js"></script>
