@@ -255,7 +255,7 @@ function sparkle() { if (!reduced) sky(); }
 (function album() {
   const A = S.album; if (!A || !A.length) return;
   const box = $('#album');
-  box.innerHTML = A.map((p, i) => `<button type="button" class="pol${p.wide ? ' wide' : ''}" data-i="${i}" style="--rot:${[-2, 1.6, -1.2, 2, -1.8][i % 5]}deg"><img src="${p.src}" alt="${p.alt}" loading="lazy" style="object-position:${p.pos}" width="${p.w}" height="${p.h}"><span>${p.cap}</span></button>`).join('') + '<div class="more">Aquí seguirán llegando más fotos nuestras ✦</div>';
+  box.innerHTML = A.map((p, i) => `<button type="button" class="pol${p.wide ? ' wide' : ''}${p.solo ? ' solo' : ''}" data-i="${i}" style="--rot:${[-2, 1.6, -1.2, 2, -1.8][i % 5]}deg"><img src="${p.src}" alt="${p.alt}" loading="lazy" style="object-position:${p.pos}" width="${p.w}" height="${p.h}"><span>${p.cap}</span></button>`).join('') + '<div class="more">Aquí seguirán llegando más fotos nuestras ✦</div>';
   const pols = [...box.querySelectorAll('.pol')];
   let timers = [];
   window.playAlbum = () => {

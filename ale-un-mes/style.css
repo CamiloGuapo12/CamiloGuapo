@@ -289,3 +289,5 @@ body.has-dock footer{padding-bottom:80px}
 .tab[aria-selected="true"]{background:var(--moon);color:#1a1d4a}
 [role="tabpanel"][hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.pol.in{animation:none}.tab{transition:none}}
+
+.pol.solo{grid-column:1/-1;justify-self:center;width:calc(50% - 7px)}
