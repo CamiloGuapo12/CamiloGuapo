@@ -257,10 +257,16 @@ function sparkle() { if (!reduced) sky(); }
   const box = $('#album');
   box.innerHTML = A.map((p, i) => `<button type="button" class="pol${p.wide ? ' wide' : ''}" data-i="${i}" style="--rot:${[-2, 1.6, -1.2, 2, -1.8][i % 5]}deg"><img src="${p.src}" alt="${p.alt}" loading="lazy" style="object-position:${p.pos}" width="${p.w}" height="${p.h}"><span>${p.cap}</span></button>`).join('') + '<div class="more">Aquí seguirán llegando más fotos nuestras ✦</div>';
   const pols = [...box.querySelectorAll('.pol')];
-  if ('IntersectionObserver' in window && !reduced) {
-    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .2 });
-    pols.forEach((p) => io.observe(p));
-  } else pols.forEach((p) => p.classList.add('in'));
+  let timers = [];
+  window.playAlbum = () => {
+    timers.forEach(clearTimeout); timers = [];
+    pols.forEach((p) => p.classList.remove('in'));
+    void box.offsetWidth;
+    pols.forEach((p, i) => {
+      if (reduced) return p.classList.add('in');
+      timers.push(setTimeout(() => { p.classList.add('in'); if (i === 0 || i % 2 === 1) p.scrollIntoView && 0; }, 500 + i * 420));
+    });
+  };
   const lb = $('#lb'); let n = 0, last;
   function show(i) {
     n = (i + A.length) % A.length; const p = A[n];
@@ -278,4 +284,17 @@ function sparkle() { if (!reduced) sky(); }
   let x0 = null; const card = $('.lb__card');
   card.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
   card.addEventListener('touchend', (e) => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 60) show(n + (dx < 0 ? 1 : -1)); });
+})();
+
+// ---- pestañas
+(function tabs() {
+  const tabs = [...document.querySelectorAll('.tab')];
+  function setTab(name) {
+    tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+    $('#panel-main').hidden = name !== 'main'; $('#panel-album').hidden = name !== 'album';
+    const bar = $('.tabs'); window.scrollTo({ top: Math.max(0, bar.offsetTop - 10), behavior: reduced ? 'auto' : 'smooth' });
+    if (name === 'album' && window.playAlbum) window.playAlbum();
+  }
+  tabs.forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
+  tabs.forEach((t, i) => t.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length]; n.focus(); n.click(); } }));
 })();

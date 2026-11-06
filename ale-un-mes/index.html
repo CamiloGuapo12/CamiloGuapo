@@ -48,7 +48,13 @@
   <div class="countdown" id="countdown" aria-live="polite"></div>
 </header>
 
+<nav class="tabs" role="tablist" aria-label="Secciones">
+  <button class="tab" role="tab" id="tab-main" aria-selected="true" aria-controls="panel-main" data-tab="main" type="button">🌙 Nuestra luna</button>
+  <button class="tab" role="tab" id="tab-album" aria-selected="false" aria-controls="panel-album" data-tab="album" type="button">📷 Nuestro álbum</button>
+</nav>
+
 <main>
+  <div id="panel-main" role="tabpanel" aria-labelledby="tab-main">
   <section aria-labelledby="h-cards">
     <h2 id="h-cards">Una luna por cada noche</h2>
     <p class="section-lede">Cada día, a la 1:00 p. m. de Honduras (2:00 p. m. de Colombia), se abre una tarjeta nueva. La luna va creciendo hasta el 11.</p>
@@ -65,12 +71,6 @@
     <ol class="timeline" id="timeline"></ol>
   </section>
 
-  <section aria-labelledby="h-album">
-    <h2 id="h-album">Nuestro álbum</h2>
-    <p class="section-lede">Toca una foto para revelarla. Cada una guarda un mensaje.</p>
-    <div class="album" id="album"></div>
-  </section>
-
   <section aria-labelledby="h-like">
     <h2 id="h-like">Lo que nos gusta a los dos</h2>
     <ul class="chips" id="chips"></ul>
@@ -81,6 +81,15 @@
     <p class="section-lede">Los nombres con los que nos hemos querido.</p>
     <div class="words" id="words"></div>
   </section>
+  </div>
+  <div id="panel-album" role="tabpanel" aria-labelledby="tab-album" hidden>
+  <section aria-labelledby="h-album">
+    <h2 id="h-album">Nuestro álbum</h2>
+    <p class="section-lede">Mira cómo van llegando. Toca una foto para revelarla: cada una guarda un mensaje.</p>
+    <div class="album" id="album"></div>
+  </section>
+
+  </div>
 </main>
 
 <footer><p>Hecho con mucho amor por Camilo, para ti <span class="wh">🤍</span></p></footer>
