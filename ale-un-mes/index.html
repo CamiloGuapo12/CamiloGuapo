@@ -6,6 +6,13 @@
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0d1030">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:title" content="Para mi Ale 🤍🌙">
+<meta property="og:description" content="Una tarjeta cada día hasta cumplir nuestro primer mes.">
+<meta property="og:image" content="og.png">
 <title>Para Ale · Mi lunita</title>
 <meta name="description" content="Una tarjeta cada noche hasta cumplir nuestro primer mes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,12 +23,16 @@
 <body>
 <div class="admin" id="admin" hidden>Modo Camilo · todas las tarjetas están abiertas para revisarlas. Ale no ve esto.</div>
 <canvas id="stars" aria-hidden="true"></canvas>
+<div id="ink" aria-hidden="true"></div>
 
 <header class="hero">
-  <div class="hero__moon" id="heroMoon" aria-hidden="true"></div>
+  <div class="emblem" aria-hidden="true">
+    <div class="hero__moon" id="heroMoon"></div>
+    <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+  </div>
   <p class="eyebrow">Nuestro primer mes · 11 de noviembre</p>
   <h1>Para mi <em>Ale</em></h1>
-  <p class="sub">Mi angelito, mi lunita, mi hogar 🤍🌙</p>
+  <p class="sub">Mi angelito, mi lunita, mi hogar <span class="wh">🤍</span></p>
   <blockquote class="first">
     «Bienvenido a mi mundo».
     <cite>Tus primeras palabras en WhatsApp · 28 de mayo</cite>
@@ -58,14 +69,14 @@
   </section>
 </main>
 
-<footer><p>Hecho con mucho amor por Camilo, para ti 🤍</p></footer>
+<footer><p>Hecho con mucho amor por Camilo, para ti <span class="wh">🤍</span></p></footer>
 
 <div class="modal" id="modal" hidden>
   <div class="modal__backdrop" data-close></div>
   <article class="modal__card" id="mCard" role="dialog" aria-modal="true" aria-labelledby="m-title">
     <div class="world" id="world" aria-hidden="true"></div>
     <div class="modal__fx" id="mfx" aria-hidden="true"></div>
-    <button class="modal__close" data-close aria-label="Cerrar">×</button>
+    <div class="modal__bar"><span class="badge" id="mBadge"></span><button class="modal__close" data-close aria-label="Cerrar">×</button></div>
     <div class="modal__scroll" id="mScroll">
       <div class="modal__moon" id="mMoon" aria-hidden="true"></div>
       <p class="modal__day" id="m-day"></p>

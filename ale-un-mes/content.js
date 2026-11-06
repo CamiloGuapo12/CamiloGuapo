@@ -6,11 +6,11 @@ window.SITE = {
   met: '2026-03-07',        // el día que te conocí
   talk: '2026-03-15',       // cuando empezamos a hablar por TikTok
   whatsapp: '2026-05-28',   // cuando pasamos a WhatsApp
-  sign: 'Con todo mi amor, tu Camilo 🤍',
+  sign: 'Con todo mi amor para mi lunita hermosa 🌙, de tu osito 🧸',
   previewKey: 'lunita',     // entra con  ?camilo=lunita  para ver todas las tarjetas
 
   cards: [
-    { d: 6, w: 1, phase: .12, anim: 'iris', title: 'Bienvenido a mi mundo',
+    { d: 6, w: 1, badge: 'En vivo', phase: .12, anim: 'iris', title: 'Bienvenido a mi mundo',
       body: [
         '<p>Ale, mi vida: el 7 de marzo apareciste en mi vida y yo ni siquiera me enteré de lo que estaba empezando. Era un día cualquiera, un live más, alguien más entrando a saludar… y resultó ser la persona que iba a cambiarme el mundo.</p>',
         '<p>Unos días después, más o menos el 15, empezamos a hablar de verdad por TikTok. Yo venía de una época en la que me había jurado no volver a confiar en nadie por redes: me habían amenazado y me había quedado con la sensación de que todo el que se acercaba tenía algo escondido. Y llegaste tú, sin pedir nada, y rompiste todas mis reglas, una por una.</p>',
@@ -19,7 +19,7 @@ window.SITE = {
         '<p>Hoy quiero devolverte esa frase. Bienvenida a mi mundo, Ale. Es pequeño, a veces desordenado y a veces ruidoso, pero tiene un lugar que siempre fue tuyo, solo que todavía no lo sabías.</p>',
         '<p class="ps">P. D. Faltan cinco días para nuestro mes. Cada uno trae una tarjeta, y esta es apenas la puerta.</p>'] },
 
-    { d: 7, w: 2, phase: .3, anim: 'flip', title: 'Mi primera moderadora',
+    { d: 7, w: 2, badge: '🛡 Moderadora oficial', phase: .3, anim: 'flip', title: 'Mi primera moderadora',
       body: [
         '<p>Hay gente que llega a tu vida para acompañarte, y hay gente que llega para sostenerte. Tú llegaste a las dos cosas.</p>',
         '<p>Fuiste mi primera moderadora en mucho tiempo, justo cuando yo venía de que quienes decían apoyarme terminaron amenazándome. Llegaste tú y cuidaste mi live como si fuera tuyo. Te volviste uno de los pilares de mis streams: un día, sin darme cuenta, ya esperaba verte en cada transmisión, y cuando no estabas se sentía un vacío que no sabía explicar. Verte a diario se volvió nuestra rutina, y esa rutina se volvió mi parte favorita del día.</p>',
@@ -28,7 +28,7 @@ window.SITE = {
         '<p>Quiero que sepas algo que quizá nunca te he dicho así de claro: yo no habría llegado hasta aquí sin ti. Gracias por no dejarme caer, Ale. Gracias por creer en mí antes de que yo mismo lo hiciera.</p>',
         '<p class="ps">P. D. Si algún día dudas de lo que vales, acuérdate de que yo tengo pruebas de sobra.</p>'] },
 
-    { d: 8, w: 3, phase: .5, anim: 'ripple', title: 'Las llamadas que antes no me gustaban',
+    { d: 8, w: 3, badge: '📞 Llamada en curso', phase: .5, anim: 'ripple', title: 'Las llamadas que antes no me gustaban',
       body: [
         '<p>Te confieso algo: yo era de los que no hacían llamadas. Contestar, esperar, pensar qué decir… me daba pereza. Y de repente llegaste tú y me hiciste amar cada llamada.</p>',
         '<p>Cuando nos pasamos a WhatsApp, nuestra primera videollamada duró dos horas. Dos horas que se sintieron como diez minutos. Desde entonces llevamos más de cuatrocientas llamadas, y yo ya perdí la cuenta de cuántas veces nos hemos reído hasta que nos duele la barriga.</p>',
@@ -37,7 +37,7 @@ window.SITE = {
         '<p>Hasta que llegue ese día, la llamada sigue prendida, aunque nadie hable.</p>',
         '<p class="ps">P. D. Si esta noche quieres, llámame. No hace falta tema: con escucharte me basta.</p>'] },
 
-    { d: 9, w: 4, phase: .7, anim: 'bounce', title: 'Lo que nos gusta',
+    { d: 9, w: 4, badge: '🍝 Nuestras cositas', phase: .7, anim: 'bounce', title: 'Lo que nos gusta',
       body: [
         '<p>Me he dado cuenta de que somos más parecidos de lo que creíamos, y de que lo nuestro se arma con cosas pequeñas:</p>',
         '<ul>' +
@@ -50,7 +50,7 @@ window.SITE = {
         '<p>Pero si te soy sincero, lo que más nos gusta es estar juntos, sin importar qué hagamos. Contigo hasta lo más normal se vuelve un plan perfecto.</p>',
         '<p class="ps">P. D. Cuando nos volvamos a ver: pasta, una serie y tú. Ese es el plan.</p>'] },
 
-    { d: 10, w: 5, phase: .88, anim: 'doors', title: 'Por fin te vi',
+    { d: 10, w: 5, badge: '🛗 Por fin juntos', phase: .88, anim: 'doors', title: 'Por fin te vi',
       body: [
         '<p>Llevaba meses esperando ese momento. Lo había imaginado tantas veces… y cuando se abrió el ascensor y te vi salir, todo lo que había ensayado en mi cabeza desapareció.</p>',
         '<p>Yo estaba nervioso y tímido, como un niño. Y tú, con tus propios nervios, llegaste y fue como si siempre hubiéramos estado ahí. Tan natural, tan fácil.</p>',
@@ -60,7 +60,7 @@ window.SITE = {
         '<p>Mañana cumplimos un mes de novios. Y mientras otros lo celebran con velas, yo lo celebro con la certeza de que esos cuatro días no fueron un final, fueron el principio.</p>',
         '<p class="ps">P. D. Te prometí abrazarte hasta el cansancio. Esa promesa sigue en pie.</p>'] },
 
-    { d: 11, w: 6, phase: 1, anim: 'moonrise', finale: true, title: 'Feliz primer mes, mi luna llena',
+    { d: 11, w: 6, badge: '🌕 Luna llena', phase: 1, anim: 'moonrise', finale: true, title: 'Feliz primer mes, mi luna llena',
       body: [
         '<p>Ale, mi amor, mi lunita, mi hogar:</p>',
         '<p>Hoy cumplimos un mes de novios. Un mes que parece pequeño en el calendario pero que es enorme en el corazón, porque no empezó el 11 de octubre. Empezó el 7 de marzo, cuando te conocí; siguió cuando empezamos a hablar; y fue creciendo en cada live, en cada llamada, en cada «buenas noches» y en cada vez que decidiste quedarte.</p>',

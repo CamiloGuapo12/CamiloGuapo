@@ -43,7 +43,7 @@ function render() {
     const dayTxt = `${c.d} de ${MONTHS[S.firstMonth - 1]}`;
     let tail;
     if (!open) tail = `<div class="count" data-t="${unlockAt(c.d)}">--:--:--<small>para que se abra</small></div><div class="hint">1:00 p. m. 🇭🇳 · 2:00 p. m. 🇨🇴</div>`;
-    else tail = `<div class="hint">${PREVIEW && !real ? 'Vista previa · se abre el ' + dayTxt : isToday ? 'La de hoy · ábrela' : 'Volver a leer'}</div>`;
+    else tail = `<div class="hint">${PREVIEW && !real ? 'Vista previa' : isToday ? 'La de hoy · ábrela' : 'Volver a leer'}</div>`;
     li.innerHTML = `<button type="button" ${open ? '' : 'aria-disabled="true"'}>
       <div class="cmoon">${moonSVG(c.phase, 'c' + i)}${open ? '' : ringSVG}</div>
       <div><div class="when">${dayTxt}</div><div class="title">${open ? c.title : 'Todavía es sorpresa'}</div></div>${tail}</button>`;
@@ -88,9 +88,9 @@ setInterval(tick, 1000);
 const rnd = (a, b) => a + Math.random() * (b - a);
 function worldHTML(w) {
   const n = (k, f) => Array.from({ length: k }, (_, i) => f(i)).join('');
-  if (w === 1) return '<span class="badge">En vivo</span>' + n(12, (i) => `<span class="bub" style="left:${rnd(4, 78).toFixed(0)}%;--t:${rnd(7, 12).toFixed(1)}s;--dl:-${rnd(0, 10).toFixed(1)}s">${['❤️', 'Ale ✨', 'mod 🛡️', 'buenas noches', '🌙', 'te quiero', '💜', 'llegó mi angelito'][i % 8]}</span>`);
-  if (w === 2) return '<span class="badge">🛡 Moderadora oficial</span><div class="shimmer"></div>' + n(14, () => `<span class="spark" style="left:${rnd(3, 94).toFixed(0)}%;top:${rnd(3, 94).toFixed(0)}%;font-size:${rnd(10, 20).toFixed(0)}px;--dl:-${rnd(0, 3).toFixed(1)}s">✦</span>`);
-  if (w === 3) return '<span class="badge">📞 Llamada en curso</span>' + n(3, (i) => `<span class="wave" style="--dl:${i * 1.2}s"></span>`) + `<div class="eq">${n(18, () => `<i style="--dl:-${rnd(0, 1).toFixed(2)}s"></i>`)}</div>`;
+  if (w === 1) return n(12, (i) => `<span class="bub" style="left:${rnd(4, 78).toFixed(0)}%;--t:${rnd(7, 12).toFixed(1)}s;--dl:-${rnd(0, 10).toFixed(1)}s">${['❤️', 'Ale ✨', 'mod 🛡️', 'buenas noches', '🌙', 'te quiero', '💜', 'llegó mi angelito'][i % 8]}</span>`);
+  if (w === 2) return '<div class="shimmer"></div>' + n(14, () => `<span class="spark" style="left:${rnd(3, 94).toFixed(0)}%;top:${rnd(3, 94).toFixed(0)}%;font-size:${rnd(10, 20).toFixed(0)}px;--dl:-${rnd(0, 3).toFixed(1)}s">✦</span>`);
+  if (w === 3) return n(3, (i) => `<span class="wave" style="--dl:${i * 1.2}s"></span>`) + `<div class="eq">${n(18, () => `<i style="--dl:-${rnd(0, 1).toFixed(2)}s"></i>`)}</div>`;
   if (w === 4) return n(14, (i) => `<span class="emo" style="left:${rnd(3, 92).toFixed(0)}%;--t:${rnd(9, 15).toFixed(1)}s;--dl:-${rnd(0, 12).toFixed(1)}s">${['🍝', '🥛', '🥣', '🎧', '🌸', '💜', '🎬'][i % 7]}</span>`);
   if (w === 5) return '<div class="sky5"></div><svg class="city" viewBox="0 0 282 120" preserveAspectRatio="none"><path fill="#14122e" d="M0 120V70h20V50h24v30h18V40h22v50h20V60h26V30h20v60h22V55h24v35h18V45h26v45h22V65h20v55z"/></svg>';
   if (w === 6) return '<div class="rays"></div>';
@@ -119,6 +119,7 @@ function openCard(c) {
   card.classList.remove('w1', 'w2', 'w3', 'w4', 'w5', 'w6'); card.classList.add('w' + c.w);
   $('#world').className = 'world w' + c.w; $('#world').innerHTML = worldHTML(c.w);
   $('#mfx').innerHTML = (FX[c.anim] || (() => ''))();
+  $('#mBadge').textContent = c.badge;
   $('#mMoon').innerHTML = moonSVG(c.phase, 'm');
   $('#m-day').textContent = `${c.d} de ${MONTHS[S.firstMonth - 1]}`;
   $('#m-title').textContent = c.title;
@@ -160,3 +161,23 @@ function sky() {
 
 render();
 document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+
+// ---- tatuajes que se dibujan solos en el fondo
+(function ink() {
+  if (reduced) return;
+  const box = $('#ink');
+  const EL = '<svg viewBox="0 0 100 70" aria-hidden="true"><g transform="rotate(-28 46 40)"><ellipse class="d" pathLength="1" cx="46" cy="40" rx="40" ry="15"/><ellipse class="d" pathLength="1" cx="46" cy="40" rx="32" ry="9.5"/><path class="d" pathLength="1" d="M18 46c10 6 28 7 44 1"/></g><circle class="f" cx="62" cy="21" r="1.1"/><circle class="f" cx="70" cy="16" r="1.1"/><circle class="f" cx="79" cy="12" r="1.2"/><path class="f" d="M90 5l1.7 5.3L97 12l-5.3 1.7L90 19l-1.7-5.3L83 12l5.3-1.7z"/></svg>';
+  const ELLA = '<svg viewBox="0 0 70 70" aria-hidden="true"><path class="d" pathLength="1" d="M35 6c1.2 12 3 20 7 25 5 1.8 12 3.4 22 4-10 .6-17 2.2-22 4-4 5-5.8 13-7 25-1.2-12-3-20-7-25-5-1.8-12-3.4-22-4 10-.6 17-2.2 22-4 4-5 5.8-13 7-25z"/><path class="d" pathLength="1" d="M35 28l2 5.5 5.5 1.5-5.5 1.5L35 42l-2-5.5L27.5 35l5.5-1.5z"/><circle class="dots" pathLength="1" cx="35" cy="35" r="27"/></svg>';
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  function spawn() {
+    if (document.hidden) return;
+    const life = 11;
+    const w = document.createElement('div');
+    w.className = 'tat';
+    const left = Math.random() < .5 ? rnd(2, 22) : rnd(62, 82);
+    w.style.cssText = `left:${left}%;top:${rnd(8, 82)}%;--sz:${rnd(70, 110).toFixed(0)}px;--rot:${rnd(-14, 14).toFixed(0)}deg;--life:${life}s`;
+    w.innerHTML = EL + ELLA + '<i>juntos 🤍</i>';
+    box.append(w); setTimeout(() => w.remove(), life * 1000);
+  }
+  setTimeout(spawn, 1500); setInterval(spawn, 6500);
+})();
