@@ -14,16 +14,17 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="admin" id="admin" hidden>Modo Camilo · todas las tarjetas están abiertas para revisarlas. Ale no ve esto.</div>
 <canvas id="stars" aria-hidden="true"></canvas>
 
 <header class="hero">
   <div class="hero__moon" id="heroMoon" aria-hidden="true"></div>
   <p class="eyebrow">Nuestro primer mes · 11 de noviembre</p>
-  <h1>Para <em>Ale</em></h1>
+  <h1>Para mi <em>Ale</em></h1>
   <p class="sub">Mi angelito, mi lunita, mi hogar 🤍🌙</p>
   <blockquote class="first">
     «Bienvenido a mi mundo».
-    <cite>Tus primeras palabras en nuestro chat · 28 de mayo</cite>
+    <cite>Tus primeras palabras en WhatsApp · 28 de mayo</cite>
   </blockquote>
   <div class="countdown" id="countdown" aria-live="polite"></div>
 </header>
@@ -31,7 +32,7 @@
 <main>
   <section aria-labelledby="h-cards">
     <h2 id="h-cards">Una luna por cada noche</h2>
-    <p class="section-lede">Cada noche se abre una tarjeta nueva. La luna va creciendo hasta el 11.</p>
+    <p class="section-lede">Cada día, a la 1:00 p. m. de Honduras (2:00 p. m. de Colombia), se abre una tarjeta nueva. La luna va creciendo hasta el 11.</p>
     <ol class="cards" id="cards"></ol>
   </section>
 
@@ -61,17 +62,22 @@
 
 <div class="modal" id="modal" hidden>
   <div class="modal__backdrop" data-close></div>
-  <article class="modal__card" role="dialog" aria-modal="true" aria-labelledby="m-title">
+  <article class="modal__card" id="mCard" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <div class="world" id="world" aria-hidden="true"></div>
+    <div class="modal__fx" id="mfx" aria-hidden="true"></div>
     <button class="modal__close" data-close aria-label="Cerrar">×</button>
-    <div class="modal__moon" id="mMoon" aria-hidden="true"></div>
-    <p class="modal__day" id="m-day"></p>
-    <h3 id="m-title"></h3>
-    <div class="modal__body" id="m-body"></div>
-    <p class="modal__sign" id="m-sign"></p>
+    <div class="modal__scroll" id="mScroll">
+      <div class="modal__moon" id="mMoon" aria-hidden="true"></div>
+      <p class="modal__day" id="m-day"></p>
+      <h3 id="m-title"></h3>
+      <div class="modal__body" id="m-body"></div>
+      <p class="modal__sign" id="m-sign"></p>
+    </div>
   </article>
 </div>
 
 <canvas id="fx" aria-hidden="true"></canvas>
+<script src="content.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
