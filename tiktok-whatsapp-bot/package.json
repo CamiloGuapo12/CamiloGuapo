@@ -1,0 +1,19 @@
+{
+  "name": "tiktok-whatsapp-sticker-bot",
+  "version": "1.0.0",
+  "description": "Bot que reenvía stickers de TikTok DMs a un grupo de WhatsApp",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "setup:whatsapp": "node src/whatsapp/setup.js",
+    "setup:tiktok": "node src/tiktok/setup.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.16",
+    "dotenv": "^16.4.7",
+    "pino": "^9.6.0",
+    "playwright": "^1.49.1",
+    "qrcode-terminal": "^0.12.0",
+    "sharp": "^0.33.5"
+  }
+}
