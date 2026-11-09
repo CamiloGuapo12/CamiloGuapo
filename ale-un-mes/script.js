@@ -6,7 +6,7 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const qs = new URLSearchParams(location.search);
 const PREVIEW = qs.get('camilo') === S.previewKey;
 const FORCE_RIDDLE = qs.get('acertijo') === '1';   // en modo Camilo, ver el acertijo como lo verá ella
-if (qs.get('reiniciar')) { try { Object.keys(localStorage).filter((k) => k.startsWith('ale.solved.')).forEach((k) => localStorage.removeItem(k)); } catch (e) { /* sin almacenamiento */ } }
+try { Object.keys(localStorage).filter((k) => k.startsWith('ale.solved.')).forEach((k) => localStorage.removeItem(k)); } catch (e) { /* sin almacenamiento */ } // limpia lo guardado antes
 
 // ---- reloj (permite probar: ?dia=2026-11-08  o  ?ahora=2026-11-08T12:59:50 en hora de Honduras)
 let offset = 0;
@@ -21,9 +21,10 @@ const fmt = (ms) => {
   const p = (n) => String(n).padStart(2, '0');
   return (d ? `${d} d ` : '') + `${p(h)}:${p(m)}:${p(s)}`;
 };
-const solvedKey = (c) => 'ale.solved.' + c.d;
-const solved = (c) => { try { return localStorage.getItem(solvedKey(c)) === '1'; } catch (e) { return false; } };
-const markSolved = (c) => { try { localStorage.setItem(solvedKey(c), '1'); } catch (e) { /* sin almacenamiento */ } };
+// el acertijo se pide SIEMPRE al entrar o recargar: solo queda resuelto mientras la página siga abierta (sin guardar nada)
+const solvedSet = new Set();
+const solved = (c) => solvedSet.has(c.d);
+const markSolved = (c) => { solvedSet.add(c.d); };
 // con acertijo: se abre solo si la resuelve (a cualquier hora, desde que se habilita)
 const riddleOn = (c) => !!c.riddle && now() >= c.riddle.earlyFromUTC && !solved(c);
 const isOpen = (c) => solved(c) || (PREVIEW && !(FORCE_RIDDLE && c.riddle)) || (!c.riddle && now() >= unlockAt(c.d)) || (!!c.riddle && now() >= unlockAt(c.d) && !c.riddle.required);
