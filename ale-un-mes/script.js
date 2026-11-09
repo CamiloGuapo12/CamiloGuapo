@@ -139,6 +139,7 @@ function openCard(c) {
   $('#m-body').innerHTML = c.body.join('');
   [...$('#m-body').children].forEach((el, i) => el.style.setProperty('--k', i));
   initUnion();
+  document.querySelectorAll('#m-body video').forEach(guardVideo);
   if (c.song && window.musicCtl) window.musicCtl.playSong(c.song);
   $('#m-sign').textContent = S.sign;
   $('#mScroll').scrollTop = 0;
@@ -322,7 +323,7 @@ function sparkle() { if (!reduced) sky(); }
     const img = $('#lbImg'), vid = $('#lbVid');
     vid.pause();
     if (p.video) {
-      img.hidden = true; vid.hidden = false; vid.poster = p.src; vid.src = p.video; vid.load();
+      img.hidden = true; vid.hidden = false; vid.dataset.retry = ''; vid.poster = p.src; vid.src = p.video; vid.load(); guardVideo(vid);
       vid.play().catch(() => {});
     } else {
       vid.hidden = true; vid.removeAttribute('src'); vid.load(); img.hidden = false;
@@ -429,3 +430,16 @@ function initUnion() {
     }
   });
 })();
+
+// ---- plan B si un video no carga (por ejemplo, copia vieja guardada en el navegador del celular)
+function guardVideo(v) {
+  if (!v || v.dataset.guard) return; v.dataset.guard = '1';
+  const base = (v.getAttribute('src') || '').split('?')[0];
+  const note = () => {
+    if (v.nextElementSibling && v.nextElementSibling.classList.contains('verr')) return;
+    const p = document.createElement('p'); p.className = 'verr';
+    p.innerHTML = `Si el video no carga aquí, <a href="${base}" target="_blank" rel="noopener">ábrelo en una pestaña nueva</a> 🤍`; v.after(p);
+  };
+  v.addEventListener('error', () => { if (!v.dataset.retry) { v.dataset.retry = '1'; v.src = base + '?r=' + Date.now(); v.load(); } else note(); });
+  setTimeout(() => { if (v.readyState === 0 && v.networkState === 3) note(); }, 6000);
+}
