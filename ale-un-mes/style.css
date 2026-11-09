@@ -380,3 +380,6 @@ body.has-dock footer{padding-bottom:80px}
 @media (prefers-reduced-motion:reduce){.rd__card,.rd__back{animation:none!important}}
 
 .dock.attn #dPlay{animation:beat 1.2s ease-in-out infinite;box-shadow:0 0 0 3px rgba(236,208,133,.6);background:rgba(236,208,133,.25)}
+
+.card .count.riddle-lock{font-size:2.2rem;line-height:1}
+.card .count.riddle-lock small{font-size:.72rem}

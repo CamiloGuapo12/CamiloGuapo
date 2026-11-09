@@ -5,6 +5,8 @@ const $ = (s) => document.querySelector(s);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const qs = new URLSearchParams(location.search);
 const PREVIEW = qs.get('camilo') === S.previewKey;
+const FORCE_RIDDLE = qs.get('acertijo') === '1';   // en modo Camilo, ver el acertijo como lo verá ella
+if (qs.get('reiniciar')) { try { Object.keys(localStorage).filter((k) => k.startsWith('ale.solved.')).forEach((k) => localStorage.removeItem(k)); } catch (e) { /* sin almacenamiento */ } }
 
 // ---- reloj (permite probar: ?dia=2026-11-08  o  ?ahora=2026-11-08T12:59:50 en hora de Honduras)
 let offset = 0;
@@ -22,8 +24,9 @@ const fmt = (ms) => {
 const solvedKey = (c) => 'ale.solved.' + c.d;
 const solved = (c) => { try { return localStorage.getItem(solvedKey(c)) === '1'; } catch (e) { return false; } };
 const markSolved = (c) => { try { localStorage.setItem(solvedKey(c), '1'); } catch (e) { /* sin almacenamiento */ } };
-const riddleOn = (c) => !!c.riddle && now() >= c.riddle.earlyFromUTC && now() < unlockAt(c.d) && !solved(c);
-const isOpen = (c) => PREVIEW || now() >= unlockAt(c.d) || solved(c);
+// con acertijo: se abre solo si la resuelve (a cualquier hora, desde que se habilita)
+const riddleOn = (c) => !!c.riddle && now() >= c.riddle.earlyFromUTC && !solved(c);
+const isOpen = (c) => solved(c) || (PREVIEW && !(FORCE_RIDDLE && c.riddle)) || (!c.riddle && now() >= unlockAt(c.d)) || (!!c.riddle && now() >= unlockAt(c.d) && !c.riddle.required);
 
 // ---- luna
 function moonSVG(p, uid) {
@@ -48,7 +51,8 @@ function render() {
     li.style.setProperty('--i', i);
     const dayTxt = `${c.d} de ${MONTHS[S.firstMonth - 1]}`;
     let tail;
-    if (!open) tail = `<div class="count" data-t="${unlockAt(c.d)}">--:--:--<small>para que se abra sola</small></div><div class="hint">${rid ? '🗝️ Ábrela ya con la palabra clave' : '1:00 p. m. 🇭🇳 · 2:00 p. m. 🇨🇴'}</div>`;
+    if (!open && rid) tail = `<div class="count riddle-lock">🗝️<small>solo con la palabra clave</small></div><div class="hint">Resuelve el acertijo para abrirla</div>`;
+    else if (!open) tail = `<div class="count" data-t="${unlockAt(c.d)}">--:--:--<small>para que se abra sola</small></div><div class="hint">1:00 p. m. 🇭🇳 · 2:00 p. m. 🇨🇴</div>`;
     else tail = `<div class="hint">${PREVIEW && !real ? 'Vista previa' : isToday ? 'La de hoy · ábrela' : 'Volver a leer'}</div>`;
     li.innerHTML = `<button type="button" ${open || rid ? '' : 'aria-disabled="true"'}>
       <div class="cmoon">${moonSVG(c.phase, 'c' + i)}${open ? '' : ringSVG}</div>

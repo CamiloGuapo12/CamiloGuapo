@@ -48,6 +48,7 @@ window.SITE = {
 
     { d: 9, w: 4, badge: '🍝 Nuestras cositas', phase: .7, anim: 'bounce', title: 'Lo que nos gusta',
       riddle: {
+        required: true,
         earlyFromUTC: Date.UTC(2026, 10, 9, 0, 0, 0),
         title: 'Un acertijo para abrir la carta de hoy',
         text: 'Una vez me dijiste que yo era tu ______ cuando estabas perdida.<br>Tiene cuatro puntas y un círculo de puntitos a su alrededor,<br>y vive en tu piel, junto a mi órbita.<br>Te prometí que, cuando necesites volver a casa, la mirarás,<br>porque ella te lleva a tu hogar.',
