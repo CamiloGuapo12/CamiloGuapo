@@ -235,15 +235,27 @@ function sparkle() { if (!reduced) sky(); }
 // ---- música: playlist de las canciones que nos dedicamos
 (function music() {
   const list = S.playlist; if (!list || !list.length) return;
-  const dock = $('#dock'); let player, ready = false, idx = 0, alt = 0, want = false, errs = 0, special = null, saved = null, sAlt = 0;
+  const dock = $('#dock');
+  let player, ready = false, idx = 0, alt = 0, errs = 0, special = null, saved = null, sAlt = 0;
+  let userWants = false; // ella quiere música (se activa al abrir; se apaga si pausa ella misma)
+  let held = false;      // pausa temporal porque suena un video
   const cur = () => (alt && list[idx].alt ? list[idx].alt[alt - 1] : list[idx].id);
   const info = () => { const t = list[idx]; $('#dTitle').textContent = `${t.title} · ${t.artist}`; $('#dBy').textContent = `Dedicada por ${t.by} · ${t.date}`; };
-  const go = (i) => { idx = (i + list.length) % list.length; alt = 0; info(); if (ready) player.loadVideoById(cur()); };
+  const mediaPlaying = () => [...document.querySelectorAll('video')].some((v) => !v.paused && !v.ended && v.readyState > 2);
+  const state = () => (ready && player.getPlayerState ? player.getPlayerState() : -1);
+  const loadOrCue = (id) => { if (userWants && !mediaPlaying()) player.loadVideoById(id); else { player.cueVideoById(id); if (mediaPlaying()) held = true; } };
+  const go = (i) => { idx = (i + list.length) % list.length; alt = 0; special = null; saved = null; info(); if (ready) { userWants = true; loadOrCue(cur()); } };
+  const attention = () => { setTimeout(() => { const st = state(); if (userWants && !held && st !== 1 && st !== 3) { dock.classList.add('open', 'attn'); } }, 1700); };
   window.onYouTubeIframeAPIReady = () => {
     player = new YT.Player('ytp', { width: '100%', height: 138, videoId: list[0].id, playerVars: { playsinline: 1, controls: 0, rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 0, disablekb: 1 },
       events: {
-        onReady: () => { ready = true; player.setVolume(35); if (want) player.playVideo(); },
-        onStateChange: (e) => { const on = e.data === 1; if (e.data === 0) { if (special) { player.seekTo(0); player.playVideo(); } else go(idx + 1); } if (on) errs = 0; dock.classList.toggle('playing', on); $('#dPlay').textContent = on ? '⏸' : '▶'; },
+        onReady: () => { ready = true; player.setVolume(35); if (userWants) player.playVideo(); },
+        onStateChange: (e) => {
+          const on = e.data === 1;
+          if (e.data === 0 && !held) { if (special) { player.seekTo(0); player.playVideo(); } else go(idx + 1); }
+          if (on) { errs = 0; dock.classList.remove('attn'); }
+          dock.classList.toggle('playing', on); $('#dPlay').textContent = on ? '⏸' : '▶';
+        },
         onError: () => { if (special) { if (special.alt && sAlt < special.alt.length) player.loadVideoById(special.alt[sAlt++]); return; } const t = list[idx]; if (t.alt && alt < t.alt.length) { alt++; player.loadVideoById(cur()); } else if (++errs < list.length) go(idx + 1); },
       } });
   };
@@ -251,33 +263,36 @@ function sparkle() { if (!reduced) sky(); }
   info();
   $('#enter').addEventListener('click', () => {
     $('#splash').classList.add('out'); dock.hidden = false; document.body.classList.add('has-dock');
-    want = true; if (ready) player.playVideo();
+    userWants = true; if (ready) player.playVideo();
   });
-  let paused = false;
   window.musicCtl = {
-    pause() { if (ready && player.getPlayerState && player.getPlayerState() === 1) { player.pauseVideo(); paused = true; } },
-    resume() { if (paused && ready) { player.playVideo(); paused = false; } },
-    playSong(s) {
-      if (!ready || special === s) return;
-      const on = player.getPlayerState && player.getPlayerState() === 1;
+    // un video empieza: se pausa la música (sin perder que ella la quiere)
+    pause() { if (!ready || !userWants) return; if (state() === 1 || state() === 3) { player.pauseVideo(); } held = true; },
+    // el video se pausó, terminó o se cerró: vuelve la música
+    resume() { if (!held) return; held = false; if (ready && userWants && !mediaPlaying()) { player.playVideo(); attention(); } },
+    playSong(sg) {
+      if (!ready || special === sg) return;
       if (!special) saved = idx;
-      special = s; sAlt = 0; paused = false;
-      $('#dTitle').textContent = `${s.title} · ${s.artist}`; $('#dBy').textContent = s.by;
-      if (on) player.loadVideoById(s.id); else player.cueVideoById(s.id);
+      special = sg; sAlt = 0;
+      $('#dTitle').textContent = `${sg.title} · ${sg.artist}`; $('#dBy').textContent = sg.by;
+      loadOrCue(sg.id);
     },
     back() {
       if (!special) return;
-      const i = saved == null ? idx : saved; special = null; saved = null; paused = false;
-      const on = player.getPlayerState && player.getPlayerState() === 1;
+      const i = saved == null ? idx : saved; special = null; saved = null;
       idx = (i + list.length) % list.length; alt = 0; info();
-      if (on) player.loadVideoById(cur()); else player.cueVideoById(cur());
+      if (ready) loadOrCue(cur());
     },
   };
   $('#dTog').addEventListener('click', () => { const o = dock.classList.toggle('open'); $('#dTog').setAttribute('aria-expanded', o); if (!o) dock.classList.remove('vid'); });
   $('#dVid').addEventListener('click', () => dock.classList.toggle('vid'));
   $('#dNext').addEventListener('click', () => go(idx + 1));
   $('#dPrev').addEventListener('click', () => go(idx - 1));
-  $('#dPlay').addEventListener('click', () => { if (!ready) return; const st = player.getPlayerState(); if (st === 1) player.pauseVideo(); else player.playVideo(); });
+  $('#dPlay').addEventListener('click', () => {
+    if (!ready) return;
+    if (state() === 1) { userWants = false; held = false; player.pauseVideo(); }
+    else { userWants = true; held = false; dock.classList.remove('attn'); player.playVideo(); }
+  });
 })();
 
 // ---- álbum de fotos
@@ -297,8 +312,6 @@ function sparkle() { if (!reduced) sky(); }
     });
   };
   const lb = $('#lb'); let n = 0, last;
-  $('#lbVid').addEventListener('play', () => window.musicCtl && window.musicCtl.pause());
-  $('#lbVid').addEventListener('ended', () => window.musicCtl && window.musicCtl.resume());
   function show(i) {
     n = (i + A.length) % A.length; const p = A[n];
     const img = $('#lbImg'), vid = $('#lbVid');
@@ -365,9 +378,11 @@ function sparkle() { if (!reduced) sky(); }
   tabs.forEach((t, i) => t.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length]; n.focus(); n.click(); } }));
 })();
 
-// videos dentro de las tarjetas: pausan la música mientras suenan
-document.addEventListener('play', (e) => { if (e.target.tagName === 'VIDEO' && e.target.id !== 'lbVid' && window.musicCtl) window.musicCtl.pause(); }, true);
-document.addEventListener('ended', (e) => { if (e.target.tagName === 'VIDEO' && e.target.id !== 'lbVid' && window.musicCtl) window.musicCtl.resume(); }, true);
+// videos (tarjetas y álbum): pausan la música mientras suenan y la devuelven al pausar o terminar
+let _vt;
+document.addEventListener('play', (e) => { if (e.target.tagName === 'VIDEO' && window.musicCtl) { clearTimeout(_vt); window.musicCtl.pause(); } }, true);
+document.addEventListener('pause', (e) => { if (e.target.tagName === 'VIDEO' && window.musicCtl) { clearTimeout(_vt); _vt = setTimeout(() => window.musicCtl.resume(), 800); } }, true);
+document.addEventListener('ended', (e) => { if (e.target.tagName === 'VIDEO' && window.musicCtl) { clearTimeout(_vt); window.musicCtl.resume(); } }, true);
 
 // ---- animación simbólica: nuestros dos tatuajes se unen
 function initUnion() {
@@ -385,7 +400,7 @@ function initUnion() {
 (function riddle() {
   const dlg = $('#rd'), form = $('#rdForm'), inp = $('#rdIn'), msg = $('#rdMsg');
   let cur = null, tries = 0, hintN = 0;
-  const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '');
+  const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]/g, '');
   const showHint = () => { const H = cur.riddle.hints || []; if (!H.length) return; msg.className = 'rd__msg'; msg.textContent = H[Math.min(hintN, H.length - 1)]; hintN++; };
   window.openRiddle = (c) => {
     cur = c; tries = 0; hintN = 0; const r = c.riddle;
