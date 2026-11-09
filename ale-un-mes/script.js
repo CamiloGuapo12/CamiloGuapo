@@ -133,7 +133,7 @@ function openCard(c) {
   if (c.anim === 'bounce') burstEmoji($('#mfx'));
   if (c.finale) setTimeout(sky, 700);
 }
-function closeCard() { $('#modal').hidden = true; document.body.style.overflow = ''; lastFocus && lastFocus.focus({ preventScroll: true }); render(); }
+function closeCard() { document.querySelectorAll('#m-body video').forEach((v) => v.pause()); window.musicCtl && window.musicCtl.resume(); $('#modal').hidden = true; document.body.style.overflow = ''; lastFocus && lastFocus.focus({ preventScroll: true }); render(); }
 document.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeCard(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#modal').hidden) closeCard(); });
 
@@ -340,3 +340,7 @@ function sparkle() { if (!reduced) sky(); }
   tabs.forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
   tabs.forEach((t, i) => t.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length]; n.focus(); n.click(); } }));
 })();
+
+// videos dentro de las tarjetas: pausan la música mientras suenan
+document.addEventListener('play', (e) => { if (e.target.tagName === 'VIDEO' && e.target.id !== 'lbVid' && window.musicCtl) window.musicCtl.pause(); }, true);
+document.addEventListener('ended', (e) => { if (e.target.tagName === 'VIDEO' && e.target.id !== 'lbVid' && window.musicCtl) window.musicCtl.resume(); }, true);
