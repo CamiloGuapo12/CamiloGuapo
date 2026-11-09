@@ -1,0 +1,50 @@
+{
+  "nombre": "Mini corpus de reseñas de restaurantes de Bogotá",
+  "version": "0.2",
+  "fecha_creacion": "2026-11-09",
+  "cambios_respecto_a_v0_1": [
+    "Se amplió el corpus de 9 a 30 reseñas (21 nuevas, escritas por estudiantes para la clase).",
+    "Balance 10 positivas / 10 negativas / 10 neutras, igual al diseño (1/3 cada una).",
+    "Se agregaron casos difíciles: ironía, reseñas mixtas, calificación que no coincide con el texto, emojis y datos personales.",
+    "Segunda ronda de anotación con guía v2 (reglas para ironía, concesiones con 'pero' y calificación numérica).",
+    "Se calculó el kappa de Cohen de la ronda 1 y se acordó una etiqueta final por consenso.",
+    "Se completaron licencia, restricciones de uso y criterios de selección."
+  ],
+  "proposito": "Reunir reseñas en español de restaurantes de Bogotá para entrenar y evaluar un clasificador de sentimiento.",
+  "tareas_previstas": [
+    "clasificación de sentimiento",
+    "estudio del vocabulario gastronómico"
+  ],
+  "poblacion": "Reseñas públicas en español de restaurantes de Bogotá",
+  "periodo": [
+    "2023-01-01",
+    "2025-12-31"
+  ],
+  "fuentes": [
+    "clase",
+    "estudiante"
+  ],
+  "criterios_seleccion": "Reseñas en español sobre restaurantes de Bogotá, escritas entre 2023 y 2025, de entre 5 y 25 palabras, con una opinión sobre comida, servicio, precio o ambiente. Textos sintéticos o de clase; ninguna reseña copiada de plataformas comerciales.",
+  "tamano": {
+    "textos": 30,
+    "tokens": 335,
+    "tipos": 195
+  },
+  "balance_final": {
+    "pos": 10,
+    "neg": 10,
+    "neu": 10
+  },
+  "anotacion": {
+    "automatica": "spaCy es_core_news_sm: tokens, lemas, POS, entidades",
+    "manual": "sentimiento pos/neg/neu, dos anotadores, guía v2, desacuerdos resueltos por consenso",
+    "kappa_cohen_ronda1": 0.7,
+    "acuerdo_observado_ronda1": 0.8,
+    "coincidencia_con_calificacion": 0.87
+  },
+  "anonimizacion": "correos, teléfonos y cédulas por regex; nombres de persona por revisión manual (spaCy solo propone candidatos: marcó 11 candidatos, solo 3 eran nombres reales, y no detectó a Laura)",
+  "licencia": "CC BY 4.0 (textos escritos por los autores del taller para uso académico)",
+  "restricciones_uso": "Uso académico y de investigación. No usar para identificar personas ni negocios reales. Corpus muy pequeño: no sirve para entrenar modelos de producción.",
+  "responsables": "[Completar: nombres de la pareja de anotadores]",
+  "contacto": "[Completar: correo institucional]"
+}
