@@ -19,7 +19,11 @@ const fmt = (ms) => {
   const p = (n) => String(n).padStart(2, '0');
   return (d ? `${d} d ` : '') + `${p(h)}:${p(m)}:${p(s)}`;
 };
-const isOpen = (c) => PREVIEW || now() >= unlockAt(c.d);
+const solvedKey = (c) => 'ale.solved.' + c.d;
+const solved = (c) => { try { return localStorage.getItem(solvedKey(c)) === '1'; } catch (e) { return false; } };
+const markSolved = (c) => { try { localStorage.setItem(solvedKey(c), '1'); } catch (e) { /* sin almacenamiento */ } };
+const riddleOn = (c) => !!c.riddle && now() >= c.riddle.earlyFromUTC && now() < unlockAt(c.d) && !solved(c);
+const isOpen = (c) => PREVIEW || now() >= unlockAt(c.d) || solved(c);
 
 // ---- luna
 function moonSVG(p, uid) {
@@ -39,16 +43,18 @@ function render() {
     const open = isOpen(c), real = now() >= unlockAt(c.d), isToday = real && hondurasDate() === `${S.year}-${S.firstMonth}-${String(c.d).padStart(2, '0')}`.replace(/-(\d)-/, '-0$1-');
     const li = document.createElement('li');
     li.dataset.w = c.w;
-    li.className = `card ${open ? 'open' : 'locked'}${isToday ? ' today' : ''}${PREVIEW && !real ? ' preview' : ''}${c.finale ? ' finale' : ''}`;
+    const rid = !open && riddleOn(c);
+    li.className = `card ${open ? 'open' : 'locked'}${rid ? ' riddle' : ''}${isToday ? ' today' : ''}${PREVIEW && !real ? ' preview' : ''}${c.finale ? ' finale' : ''}`;
     li.style.setProperty('--i', i);
     const dayTxt = `${c.d} de ${MONTHS[S.firstMonth - 1]}`;
     let tail;
-    if (!open) tail = `<div class="count" data-t="${unlockAt(c.d)}">--:--:--<small>para que se abra</small></div><div class="hint">1:00 p. m. 🇭🇳 · 2:00 p. m. 🇨🇴</div>`;
+    if (!open) tail = `<div class="count" data-t="${unlockAt(c.d)}">--:--:--<small>para que se abra sola</small></div><div class="hint">${rid ? '🗝️ Ábrela ya con la palabra clave' : '1:00 p. m. 🇭🇳 · 2:00 p. m. 🇨🇴'}</div>`;
     else tail = `<div class="hint">${PREVIEW && !real ? 'Vista previa' : isToday ? 'La de hoy · ábrela' : 'Volver a leer'}</div>`;
-    li.innerHTML = `<button type="button" ${open ? '' : 'aria-disabled="true"'}>
+    li.innerHTML = `<button type="button" ${open || rid ? '' : 'aria-disabled="true"'}>
       <div class="cmoon">${moonSVG(c.phase, 'c' + i)}${open ? '' : ringSVG}</div>
-      <div><div class="when">${dayTxt}</div><div class="title">${open ? c.title : 'Todavía es sorpresa'}</div></div>${tail}</button>`;
+      <div><div class="when">${dayTxt}</div><div class="title">${open ? c.title : rid ? 'Un acertijo para abrirla' : 'Todavía es sorpresa'}</div></div>${tail}</button>`;
     if (open) li.firstChild.addEventListener('click', () => openCard(c));
+    else if (rid) li.firstChild.addEventListener('click', () => window.openRiddle(c));
     list.append(li);
   });
 
@@ -85,6 +91,9 @@ setInterval(tick, 1000);
 
 // ---- mundos
 const rnd = (a, b) => a + Math.random() * (b - a);
+const EL = '<svg viewBox="0 0 100 70" aria-hidden="true"><g transform="rotate(-28 46 40)"><ellipse class="d" pathLength="1" cx="46" cy="40" rx="40" ry="15"/><ellipse class="d" pathLength="1" cx="46" cy="40" rx="32" ry="9.5"/><path class="d" pathLength="1" d="M18 46c10 6 28 7 44 1"/></g><circle class="f" cx="62" cy="21" r="1.1"/><circle class="f" cx="70" cy="16" r="1.1"/><circle class="f" cx="79" cy="12" r="1.2"/><path class="f" d="M90 5l1.7 5.3L97 12l-5.3 1.7L90 19l-1.7-5.3L83 12l5.3-1.7z"/></svg>';
+const ELLA = '<svg viewBox="0 0 70 70" aria-hidden="true"><path class="d" pathLength="1" d="M35 6c1.2 12 3 20 7 25 5 1.8 12 3.4 22 4-10 .6-17 2.2-22 4-4 5-5.8 13-7 25-1.2-12-3-20-7-25-5-1.8-12-3.4-22-4 10-.6 17-2.2 22-4 4-5 5.8-13 7-25z"/><path class="d" pathLength="1" d="M35 28l2 5.5 5.5 1.5-5.5 1.5L35 42l-2-5.5L27.5 35l5.5-1.5z"/><circle class="dots" pathLength="1" cx="35" cy="35" r="27"/></svg>';
+
 function worldHTML(w) {
   const n = (k, f) => Array.from({ length: k }, (_, i) => f(i)).join('');
   if (w === 1) return n(12, (i) => `<span class="bub" style="left:${rnd(4, 78).toFixed(0)}%;--t:${rnd(7, 12).toFixed(1)}s;--dl:-${rnd(0, 10).toFixed(1)}s">${['❤️', 'Ale ✨', 'mod 🛡️', 'buenas noches', '🌙', 'te quiero', '💜', 'llegó mi angelito'][i % 8]}</span>`);
@@ -124,6 +133,8 @@ function openCard(c) {
   $('#m-title').textContent = c.title;
   $('#m-body').innerHTML = c.body.join('');
   [...$('#m-body').children].forEach((el, i) => el.style.setProperty('--k', i));
+  initUnion();
+  if (c.song && window.musicCtl) window.musicCtl.playSong(c.song);
   $('#m-sign').textContent = S.sign;
   $('#mScroll').scrollTop = 0;
   $('#modal').hidden = false; document.body.style.overflow = 'hidden';
@@ -133,7 +144,7 @@ function openCard(c) {
   if (c.anim === 'bounce') burstEmoji($('#mfx'));
   if (c.finale) setTimeout(sky, 700);
 }
-function closeCard() { document.querySelectorAll('#m-body video').forEach((v) => v.pause()); window.musicCtl && window.musicCtl.resume(); $('#modal').hidden = true; document.body.style.overflow = ''; lastFocus && lastFocus.focus({ preventScroll: true }); render(); }
+function closeCard() { document.querySelectorAll('#m-body video').forEach((v) => v.pause()); window.musicCtl && (window.musicCtl.back(), window.musicCtl.resume()); $('#modal').hidden = true; document.body.style.overflow = ''; lastFocus && lastFocus.focus({ preventScroll: true }); render(); }
 document.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeCard(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#modal').hidden) closeCard(); });
 
@@ -165,8 +176,6 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) tick
 (function ink() {
   if (reduced) return;
   const box = $('#ink');
-  const EL = '<svg viewBox="0 0 100 70" aria-hidden="true"><g transform="rotate(-28 46 40)"><ellipse class="d" pathLength="1" cx="46" cy="40" rx="40" ry="15"/><ellipse class="d" pathLength="1" cx="46" cy="40" rx="32" ry="9.5"/><path class="d" pathLength="1" d="M18 46c10 6 28 7 44 1"/></g><circle class="f" cx="62" cy="21" r="1.1"/><circle class="f" cx="70" cy="16" r="1.1"/><circle class="f" cx="79" cy="12" r="1.2"/><path class="f" d="M90 5l1.7 5.3L97 12l-5.3 1.7L90 19l-1.7-5.3L83 12l5.3-1.7z"/></svg>';
-  const ELLA = '<svg viewBox="0 0 70 70" aria-hidden="true"><path class="d" pathLength="1" d="M35 6c1.2 12 3 20 7 25 5 1.8 12 3.4 22 4-10 .6-17 2.2-22 4-4 5-5.8 13-7 25-1.2-12-3-20-7-25-5-1.8-12-3.4-22-4 10-.6 17-2.2 22-4 4-5 5.8-13 7-25z"/><path class="d" pathLength="1" d="M35 28l2 5.5 5.5 1.5-5.5 1.5L35 42l-2-5.5L27.5 35l5.5-1.5z"/><circle class="dots" pathLength="1" cx="35" cy="35" r="27"/></svg>';
   const rnd = (a, b) => a + Math.random() * (b - a);
   function spawn() {
     if (document.hidden) return;
@@ -226,7 +235,7 @@ function sparkle() { if (!reduced) sky(); }
 // ---- música: playlist de las canciones que nos dedicamos
 (function music() {
   const list = S.playlist; if (!list || !list.length) return;
-  const dock = $('#dock'); let player, ready = false, idx = 0, alt = 0, want = false, errs = 0;
+  const dock = $('#dock'); let player, ready = false, idx = 0, alt = 0, want = false, errs = 0, special = null, saved = null, sAlt = 0;
   const cur = () => (alt && list[idx].alt ? list[idx].alt[alt - 1] : list[idx].id);
   const info = () => { const t = list[idx]; $('#dTitle').textContent = `${t.title} · ${t.artist}`; $('#dBy').textContent = `Dedicada por ${t.by} · ${t.date}`; };
   const go = (i) => { idx = (i + list.length) % list.length; alt = 0; info(); if (ready) player.loadVideoById(cur()); };
@@ -234,8 +243,8 @@ function sparkle() { if (!reduced) sky(); }
     player = new YT.Player('ytp', { width: '100%', height: 138, videoId: list[0].id, playerVars: { playsinline: 1, controls: 0, rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 0, disablekb: 1 },
       events: {
         onReady: () => { ready = true; player.setVolume(35); if (want) player.playVideo(); },
-        onStateChange: (e) => { const on = e.data === 1; if (e.data === 0) go(idx + 1); if (on) errs = 0; dock.classList.toggle('playing', on); $('#dPlay').textContent = on ? '⏸' : '▶'; },
-        onError: () => { const t = list[idx]; if (t.alt && alt < t.alt.length) { alt++; player.loadVideoById(cur()); } else if (++errs < list.length) go(idx + 1); },
+        onStateChange: (e) => { const on = e.data === 1; if (e.data === 0) { if (special) { player.seekTo(0); player.playVideo(); } else go(idx + 1); } if (on) errs = 0; dock.classList.toggle('playing', on); $('#dPlay').textContent = on ? '⏸' : '▶'; },
+        onError: () => { if (special) { if (special.alt && sAlt < special.alt.length) player.loadVideoById(special.alt[sAlt++]); return; } const t = list[idx]; if (t.alt && alt < t.alt.length) { alt++; player.loadVideoById(cur()); } else if (++errs < list.length) go(idx + 1); },
       } });
   };
   const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; s.async = true; document.head.append(s);
@@ -248,6 +257,21 @@ function sparkle() { if (!reduced) sky(); }
   window.musicCtl = {
     pause() { if (ready && player.getPlayerState && player.getPlayerState() === 1) { player.pauseVideo(); paused = true; } },
     resume() { if (paused && ready) { player.playVideo(); paused = false; } },
+    playSong(s) {
+      if (!ready || special === s) return;
+      const on = player.getPlayerState && player.getPlayerState() === 1;
+      if (!special) saved = idx;
+      special = s; sAlt = 0; paused = false;
+      $('#dTitle').textContent = `${s.title} · ${s.artist}`; $('#dBy').textContent = s.by;
+      if (on) player.loadVideoById(s.id); else player.cueVideoById(s.id);
+    },
+    back() {
+      if (!special) return;
+      const i = saved == null ? idx : saved; special = null; saved = null; paused = false;
+      const on = player.getPlayerState && player.getPlayerState() === 1;
+      idx = (i + list.length) % list.length; alt = 0; info();
+      if (on) player.loadVideoById(cur()); else player.cueVideoById(cur());
+    },
   };
   $('#dTog').addEventListener('click', () => { const o = dock.classList.toggle('open'); $('#dTog').setAttribute('aria-expanded', o); if (!o) dock.classList.remove('vid'); });
   $('#dVid').addEventListener('click', () => dock.classList.toggle('vid'));
@@ -344,3 +368,44 @@ function sparkle() { if (!reduced) sky(); }
 // videos dentro de las tarjetas: pausan la música mientras suenan
 document.addEventListener('play', (e) => { if (e.target.tagName === 'VIDEO' && e.target.id !== 'lbVid' && window.musicCtl) window.musicCtl.pause(); }, true);
 document.addEventListener('ended', (e) => { if (e.target.tagName === 'VIDEO' && e.target.id !== 'lbVid' && window.musicCtl) window.musicCtl.resume(); }, true);
+
+// ---- animación simbólica: nuestros dos tatuajes se unen
+function initUnion() {
+  const els = [...document.querySelectorAll('#m-body .union')]; if (!els.length) return;
+  const heart = '<svg class="u-heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+  els.forEach((u) => {
+    u.innerHTML = `<div class="u">${ELLA}</div>${heart}<div class="u">${EL}</div><p class="u-cap">Dos dibujos. Una sola historia. Imborrable.</p>`;
+    if (reduced || !('IntersectionObserver' in window)) { u.classList.add('in'); return; }
+    const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { u.classList.add('in'); io.disconnect(); } }, { root: $('#mScroll'), threshold: .7 });
+    io.observe(u);
+  });
+}
+
+// ---- acertijo: palabra clave para abrir una carta antes de tiempo
+(function riddle() {
+  const dlg = $('#rd'), form = $('#rdForm'), inp = $('#rdIn'), msg = $('#rdMsg');
+  let cur = null, tries = 0, hintN = 0;
+  const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '');
+  const showHint = () => { const H = cur.riddle.hints || []; if (!H.length) return; msg.className = 'rd__msg'; msg.textContent = H[Math.min(hintN, H.length - 1)]; hintN++; };
+  window.openRiddle = (c) => {
+    cur = c; tries = 0; hintN = 0; const r = c.riddle;
+    $('#rdT').textContent = r.title; $('#rdText').innerHTML = r.text; $('#rdAsk').textContent = r.ask; inp.value = ''; msg.textContent = ''; msg.className = 'rd__msg';
+    dlg.hidden = false; document.body.style.overflow = 'hidden'; setTimeout(() => inp.focus({ preventScroll: true }), 60);
+  };
+  const close = () => { dlg.hidden = true; document.body.style.overflow = ''; };
+  dlg.addEventListener('click', (e) => { if (e.target.closest('[data-rdclose]')) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !dlg.hidden) close(); });
+  $('#rdHint').addEventListener('click', showHint);
+  form.addEventListener('submit', (e) => {
+    e.preventDefault(); if (!cur) return;
+    const v = norm(inp.value); if (!v) return;
+    if (cur.riddle.answers.some((a) => v.includes(a))) {
+      msg.className = 'rd__msg ok'; msg.textContent = cur.riddle.win + ' 🤍'; markSolved(cur); sky();
+      const c = cur; setTimeout(() => { close(); render(); openCard(c); }, 1400);
+    } else {
+      tries++; msg.className = 'rd__msg'; msg.textContent = 'Casi… piénsalo con el corazón y vuelve a intentarlo 💭';
+      if (!reduced) { form.classList.remove('shake'); void form.offsetWidth; form.classList.add('shake'); }
+      if (tries >= 2) setTimeout(showHint, 900);
+    }
+  });
+})();
